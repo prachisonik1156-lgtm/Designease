@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DesignEase — Admin Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">D</div>
+    <span class="logo-text">DesignEase</span>
+    <span class="logo-badge">Admin</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Main</div>
+    <a href="{{ url_for('admin_dashboard') }}" class="nav-item active">
+      <i class="fas fa-chart-pie"></i> Dashboard
+    </a>
+    <a href="{{ url_for('manage_templates') }}" class="nav-item">
+      <i class="fas fa-layer-group"></i> Manage Templates
+    </a>
+    <a href="{{ url_for('user_report') }}" class="nav-item">
+      <i class="fas fa-chart-bar"></i> Usage Reports
+    </a>
+    <div class="nav-section-title">Management</div>
+
+    <a href="{{ url_for('admin_messages') }}" class="nav-item">
+    <i class="fas fa-envelope"></i> Messages
+    </a>
+    <a href="{{ url_for('ai_features') }}" class="nav-item">
+      <i class="fas fa-robot"></i> AI Features
+    </a>
+    <a href="/admin/users" class="nav-item">
+      <i class="fas fa-users"></i> User Management
+    </a>
+    <a href="{{ url_for('system_config') }}" class="nav-item">
+      <i class="fas fa-sliders-h"></i> System Config
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-info">
+      <div class="admin-avatar">A</div>
+      <div>
+        <div class="admin-name">Administrator</div>
+        <div class="admin-role">Super Admin</div>
+      </div>
+    </div>
+    <a href="{{ url_for('logout') }}" class="logout-btn">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrapper">
+  <header class="top-header">
+    <div>
+      <span class="header-title">Dashboard</span>
+      <span class="header-subtitle">Overview & Analytics</span>
+    </div>
+  </header>
+
+  <main class="page-content">
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card purple">
+        <div class="stat-top">
+          <div class="stat-icon purple"><i class="fas fa-users"></i></div>
+          <span class="stat-change up">↑ 12%</span>
+        </div>
+        <div class="stat-value" data-count="{{ total_users }}">{{ total_users }}</div>
+        <div class="stat-label">Total Users</div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:68%"></div></div>
+      </div>
+
+      <div class="stat-card green">
+        <div class="stat-top">
+          <div class="stat-icon green"><i class="fas fa-layer-group"></i></div>
+          <span class="stat-change up">↑ 8%</span>
+        </div>
+        <div class="stat-value" data-count="{{ total_templates }}">{{ total_templates }}</div>
+        <div class="stat-label">Total Templates</div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:45%"></div></div>
+      </div>
+
+      <div class="stat-card red">
+        <div class="stat-top">
+          <div class="stat-icon red"><i class="fas fa-paint-brush"></i></div>
+          <span class="stat-change up">↑ 24%</span>
+        </div>
+        <div class="stat-value" data-count="{{ total_designs }}">0</div>
+        <div class="stat-label">Designs Created</div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:82%"></div></div>
+      </div>
+
+      <div class="stat-card yellow">
+        <div class="stat-top">
+          <div class="stat-icon yellow"><i class="fas fa-robot"></i></div>
+          <span class="stat-change up">↑ 31%</span>
+        </div>
+        <div class="stat-value" data-count="{{ total_ai }}">0</div>
+        <div class="stat-label">AI Presentations</div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:57%"></div></div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="grid-2" style="margin-bottom:20px">
+
+      <!-- Activity Chart -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-chart-area"></i> Activity Overview</div>
+          <select class="form-control" style="width:auto;padding:5px 10px;font-size:12px" onchange="updateActivityChart(this.value)">
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+        <div class="card-body">
+          <canvas id="activityChart" height="120"></canvas>
+        </div>
+      </div>
+
+      <!-- ✅ FIXED: Content Distribution — chart + legend side by side, no empty space -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-chart-pie"></i> Content Distribution</div>
+        </div>
+        <div class="card-body" style="padding: 16px 20px;">
+          <div style="display:flex; align-items:center; gap:20px;">
+
+            <!-- Donut chart — fixed size, no flex stretching -->
+            <div style="flex-shrink:0; width:160px; height:160px; position:relative;">
+              <canvas id="donutChart" style="width:160px!important;height:160px!important;"></canvas>
+            </div>
+
+            <!-- Legend -->
+            <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:10px;height:10px;border-radius:50%;background:#6c63ff;flex-shrink:0"></div>
+                <span style="font-size:12px;color:var(--text-muted);flex:1">Poster Templates</span>
+                <span style="font-size:12px;font-weight:600">4</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:10px;height:10px;border-radius:50%;background:#00d4aa;flex-shrink:0"></div>
+                <span style="font-size:12px;color:var(--text-muted);flex:1">Resume Templates</span>
+                <span style="font-size:12px;font-weight:600">5</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:10px;height:10px;border-radius:50%;background:#ff6b6b;flex-shrink:0"></div>
+                <span style="font-size:12px;color:var(--text-muted);flex:1">AI Presentations</span>
+                <span style="font-size:12px;font-weight:600">{{ total_ai }}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:10px;height:10px;border-radius:50%;background:#ffd93d;flex-shrink:0"></div>
+                <span style="font-size:12px;color:var(--text-muted);flex:1">User Designs</span>
+                <span style="font-size:12px;font-weight:600">{{ total_designs }}</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM ROW -->
+    <div class="grid-2">
+
+      <!-- Recent Users -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-user-plus"></i> Recent Users</div>
+          <a href="/admin/users" class="btn btn-outline btn-sm">View All</a>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Joined</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in recent_users %}
+              <tr>
+                <td>
+                  <div class="user-cell">
+                    <div class="u-avatar">{{ (user.username or user.name or 'U')[0].upper() }}</div>
+                    <div>
+                      <div class="u-name">{{ user.username or user.name or 'Unknown' }}</div>
+                      <div class="u-email">{{ user.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-size:12px;color:var(--text-muted)">
+                  {{ user.created_at[:10] if user.created_at else 'N/A' }}
+                </td>
+                <td>
+                  <span class="badge {{ 'badge-red' if user.status == 'blocked' else 'badge-green' }}">
+                    {{ user.status or 'active' }}
+                  </span>
+                </td>
+              </tr>
+              {% else %}
+              <tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:24px">No users yet</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Activity Feed -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-bolt"></i> Recent Activity</div>
+          <span class="badge badge-green" style="font-size:10px">Live</span>
+        </div>
+        <div class="card-body">
+          {% if recent_activity %}
+            {% for act in recent_activity %}
+            <div class="activity-item">
+              <div class="activity-dot {% if act.details == 'ai' %}yellow{% elif act.details == 'template' %}purple{% elif act.details == 'user' %}green{% else %}red{% endif %}">
+                <i class="fas {% if act.details == 'ai' %}fa-robot{% elif act.details == 'template' %}fa-layer-group{% elif act.details == 'user' %}fa-user-plus{% else %}fa-paint-brush{% endif %}"></i>
+              </div>
+              <div>
+                <div class="activity-text">{{ act.action }}</div>
+                <div class="activity-time">{{ act.created_at[:16] if act.created_at else '' }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="activity-item">
+              <div class="activity-dot purple"><i class="fas fa-user-plus"></i></div>
+              <div>
+                <div class="activity-text">New user registered on DesignEase</div>
+                <div class="activity-time">2 minutes ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot green"><i class="fas fa-paint-brush"></i></div>
+              <div>
+                <div class="activity-text">New design created — Instagram Post</div>
+                <div class="activity-time">8 minutes ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot yellow"><i class="fas fa-robot"></i></div>
+              <div>
+                <div class="activity-text">AI Presentation generated — "Climate Change"</div>
+                <div class="activity-time">15 minutes ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot red"><i class="fas fa-download"></i></div>
+              <div>
+                <div class="activity-text">Hiking Poster template downloaded</div>
+                <div class="activity-time">32 minutes ago</div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div id="admin-toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+const weeklyData = {
+  labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+  designs: [42, 68, 55, 89, 74, 103, 91],
+  presentations: [12, 18, 15, 24, 19, 31, 27]
+};
+const monthlyData = {
+  labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+  designs: [180, 240, 210, 290, 320, 410, 380, 450, 420, 490, 460, 520],
+  presentations: [45, 60, 52, 78, 82, 105, 94, 118, 110, 130, 122, 145]
+};
+
+let actChart;
+function buildActivityChart(data) {
+  const ctx = document.getElementById('activityChart').getContext('2d');
+  if (actChart) actChart.destroy();
+  actChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.labels,
+      datasets: [
+        {
+          label: 'Designs',
+          data: data.designs,
+          borderColor: '#6c63ff',
+          backgroundColor: 'rgba(108,99,255,0.1)',
+          fill: true, tension: 0.4, pointRadius: 3,
+          pointBackgroundColor: '#6c63ff'
+        },
+        {
+          label: 'AI Presentations',
+          data: data.presentations,
+          borderColor: '#00d4aa',
+          backgroundColor: 'rgba(0,212,170,0.08)',
+          fill: true, tension: 0.4, pointRadius: 3,
+          pointBackgroundColor: '#00d4aa'
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'top' } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
+function updateActivityChart(period) {
+  buildActivityChart(period === 'monthly' ? monthlyData : weeklyData);
+}
+
+buildActivityChart(weeklyData);
+
+// ✅ FIXED Donut Chart — maintainAspectRatio:false + fixed container size
+new Chart(document.getElementById('donutChart').getContext('2d'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Posters', 'Resumes', 'AI Presentations', 'User Designs'],
+    datasets: [{
+      data: [4, 5, {{ total_ai }}, {{ total_designs }} ] ,
+      backgroundColor: ['#6c63ff','#00d4aa','#ff6b6b','#ffd93d'],
+      borderWidth: 0,
+      hoverOffset: 6
+    }]
+  },
+  options: {
+    responsive: false,
+    maintainAspectRatio: false,
+    cutout: '72%',
+    plugins: { legend: { display: false } }
+  }
+});
+</script>
+</body>
+</html>

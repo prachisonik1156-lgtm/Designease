@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Social Media Template 2</title>
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+body{
+  background:#e8e8e8;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  font-family:'Segoe UI',sans-serif;
+  padding:20px;
+}
+.post{
+  width:600px;
+  height:600px;
+  background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+  border-radius:20px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* Glow circles */
+.glow1{
+  position:absolute;
+  width:300px; height:300px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(139,92,246,0.35) 0%,transparent 70%);
+  top:-80px; right:-60px;
+}
+.glow2{
+  position:absolute;
+  width:250px; height:250px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(236,72,153,0.3) 0%,transparent 70%);
+  bottom:-60px; left:-40px;
+}
+
+/* Profile area top */
+.profile-bar{
+  position:absolute;
+  top:24px; left:24px; right:24px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.profile-pic{
+  width:46px; height:46px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#8b5cf6,#ec4899);
+  padding:2px;
+  cursor:pointer;
+  overflow:hidden;
+  flex-shrink:0;
+}
+.profile-pic img{
+  width:100%; height:100%;
+  border-radius:50%;
+  object-fit:cover;
+  background:#1a1a2e;
+}
+.profile-info{ flex:1; }
+.profile-name{
+  color:#fff;
+  font-size:15px;
+  font-weight:700;
+}
+.profile-handle{
+  color:rgba(255,255,255,0.45);
+  font-size:12px;
+}
+.follow-btn{
+  background:linear-gradient(135deg,#8b5cf6,#ec4899);
+  color:#fff;
+  border:none;
+  border-radius:20px;
+  padding:7px 18px;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+/* Center content */
+.center{
+  text-align:center;
+  padding:20px 50px;
+  position:relative;
+  z-index:2;
+}
+.quote-mark{
+  font-size:80px;
+  line-height:0.6;
+  color:rgba(139,92,246,0.5);
+  font-family:Georgia,serif;
+  margin-bottom:20px;
+  display:block;
+}
+.quote{
+  font-size:26px;
+  font-weight:700;
+  color:#fff;
+  line-height:1.45;
+  margin-bottom:18px;
+  letter-spacing:-0.3px;
+}
+.author{
+  font-size:14px;
+  color:rgba(255,255,255,0.5);
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+/* Bottom */
+.bottom-bar{
+  position:absolute;
+  bottom:24px; left:24px; right:24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.tags{
+  font-size:13px;
+  color:rgba(139,92,246,0.8);
+}
+.likes{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  color:rgba(255,255,255,0.5);
+  font-size:13px;
+}
+.likes span{ cursor:pointer; transition:color 0.2s; }
+.likes span:hover{ color:#ec4899; }
+
+#picInput{ display:none; }
+[contenteditable="true"]:hover{
+  background:rgba(255,255,255,0.08);
+  border-radius:4px;
+  outline:none;
+}
+[contenteditable="true"]:focus{ outline:none; }
+</style>
+</head>
+<body>
+
+<div class="post">
+  <div class="glow1"></div>
+  <div class="glow2"></div>
+
+  <!-- Profile Bar -->
+  <div class="profile-bar">
+    <div class="profile-pic" onclick="document.getElementById('picInput').click()">
+      <img id="profilePic" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&auto=format">
+    </div>
+    <input type="file" id="picInput" accept="image/*">
+    <div class="profile-info">
+      <div class="profile-name" contenteditable="true">Alex Johnson</div>
+      <div class="profile-handle" contenteditable="true">@alexjohnson</div>
+    </div>
+    <button class="follow-btn">Follow</button>
+  </div>
+
+  <!-- Quote -->
+  <div class="center">
+    <span class="quote-mark">"</span>
+    <div class="quote" contenteditable="true">
+      The best way to predict the future is to create it yourself.
+    </div>
+    <div class="author" contenteditable="true">— Peter Drucker</div>
+  </div>
+
+  <!-- Bottom -->
+  <div class="bottom-bar">
+    <div class="tags" contenteditable="true">#Motivation #Success #Mindset</div>
+    <div class="likes">
+      <span>❤️ <span contenteditable="true">2.4k</span></span>
+      <span>💬 <span contenteditable="true">148</span></span>
+      <span>🔁 <span contenteditable="true">320</span></span>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('picInput').addEventListener('change',function(e){
+  const file=e.target.files[0];
+  if(file){ const r=new FileReader(); r.onload=ev=>document.getElementById('profilePic').src=ev.target.result; r.readAsDataURL(file); }
+});
+</script>
+</body>
+</html>

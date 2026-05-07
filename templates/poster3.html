@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Poster - Daniel Smart</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body { background: #f0f0f0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        
+        .poster {
+            width: 800px; height: 800px; background: white; position: relative;
+            overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        }
+
+        /* Yellow Accents */
+        .side-bar { position: absolute; left: 0; width: 40px; height: 100%; background: #e9c441; }
+        .bottom-bar { position: absolute; bottom: 0; width: 100%; height: 40px; background: #e9c441; }
+
+        /* Top Design with Image */
+        .circle-crop {
+            position: absolute; top: -80px; right: -80px;
+            width: 650px; height: 650px; background: #e9c441;
+            border-radius: 50%; overflow: hidden; border: 15px solid #e9c441;
+        }
+        .circle-crop img { width: 100%; height: 100%; object-fit: cover; }
+
+        .name-tag {
+            position: absolute; top: 380px; right: 80px; color: white; text-align: left;
+        }
+        .name-tag p { font-size: 20px; }
+        .name-tag h1 { font-size: 70px; line-height: 0.8; font-weight: 900; text-transform: uppercase; }
+
+        /* Content Area */
+        .content { padding: 60px 80px 40px 100px; margin-top: 50px; }
+        .dots { color: #33475b; font-size: 30px; letter-spacing: 10px; margin-bottom: 20px; }
+        
+        .date-box {
+            background: #33475b; color: white; padding: 20px 40px;
+            display: inline-block; border-radius: 10px; font-size: 32px; font-weight: bold;
+        }
+        .date-box span { color: #e9c441; }
+
+        .desc { color: #666; font-size: 18px; line-height: 1.6; margin: 30px 0; max-width: 450px; }
+
+        .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px; }
+        .info h3 { color: #33475b; margin-bottom: 10px; }
+        .info p { color: #444; margin-bottom: 5px; font-size: 16px; }
+        .info i { width: 25px; color: #33475b; }
+
+        .socials p { font-weight: bold; margin-bottom: 10px; color: #33475b; text-align: right; }
+        .socials i { 
+            font-size: 20px; color: #33475b; margin-left: 10px;
+            border: 2px solid #33475b; padding: 8px; border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="poster">
+        <div class="side-bar"></div>
+        <div class="bottom-bar"></div>
+        <div class="circle-crop">
+            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800" alt="Speaker">
+        </div>
+        <div class="name-tag">
+            <p>special talk from</p>
+            <h1>Daniel<br>Smart</h1>
+        </div>
+        <div class="content">
+            <div class="dots">. . . . . .</div>
+            <div class="date-box">JULY 14 <span>| 7 PM</span></div>
+            <p class="desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</p>
+            <div class="footer">
+                <div class="info">
+                    <h3>Info at:</h3>
+                    <p><i class="fas fa-phone"></i> +012 3456 789 00</p>
+                    <p><i class="fas fa-globe"></i> www.yourwebsite.com</p>
+                    <p><i class="fas fa-envelope"></i> yourmail@mail.com</p>
+                </div>
+                <div class="socials">
+                    <p>Follow us:</p>
+                    <i class="fab fa-facebook-f"></i>
+                    <i class="fab fa-instagram"></i>
+                    <i class="fab fa-youtube"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

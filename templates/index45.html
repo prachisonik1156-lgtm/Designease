@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editable Resume with Photo Upload</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      background:#f2f2f2;
+      font-family:"Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      padding:30px 0;
+    }
+
+    .resume{
+      width:900px;
+      min-height:1300px;
+      margin:0 auto;
+      display:flex;
+      background:#fff;
+      box-shadow:0 10px 30px rgba(0,0,0,0.12);
+    }
+
+    .left{
+      width:38%;
+      background:#f3f3f3;
+      padding:55px 40px;
+      text-align:center;
+    }
+
+    .right{
+      width:62%;
+      background:#fff;
+      padding:70px 60px;
+    }
+
+    .profile-img{
+      width:220px;
+      height:220px;
+      border-radius:50%;
+      overflow:hidden;
+      margin:0 auto 20px;
+      background:#ddd;
+      position:relative;
+      cursor:pointer;
+      border:3px solid #e5e5e5;
+    }
+
+    .profile-img img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .profile-img::after{
+      content:"Click to upload";
+      position:absolute;
+      bottom:0;
+      left:0;
+      right:0;
+      background:rgba(0,0,0,0.5);
+      color:#fff;
+      text-align:center;
+      font-size:14px;
+      padding:8px;
+      opacity:0;
+      transition:0.3s;
+    }
+
+    .profile-img:hover::after{
+      opacity:1;
+    }
+
+    .upload-btn{
+      display:inline-block;
+      margin-bottom:45px;
+      padding:10px 18px;
+      border:none;
+      background:#222;
+      color:#fff;
+      border-radius:25px;
+      cursor:pointer;
+      font-size:14px;
+      transition:0.3s;
+    }
+
+    .upload-btn:hover{
+      background:#444;
+    }
+
+    .name{
+      font-size:38px;
+      font-weight:300;
+      letter-spacing:2px;
+      line-height:1.1;
+      color:#222;
+    }
+
+    .sub-title{
+      margin-top:18px;
+      font-size:14px;
+      letter-spacing:4px;
+      color:#555;
+      font-weight:400;
+    }
+
+    .section-title{
+      margin-top:55px;
+      font-size:18px;
+      letter-spacing:4px;
+      color:#222;
+      font-weight:400;
+      text-align:center;
+      position:relative;
+      padding-bottom:14px;
+    }
+
+    .section-title::after{
+      content:"";
+      width:100%;
+      height:1px;
+      background:#444;
+      position:absolute;
+      left:0;
+      bottom:0;
+    }
+
+    .contact{
+      margin-top:28px;
+      text-align:left;
+    }
+
+    .contact-item{
+      display:flex;
+      align-items:flex-start;
+      gap:14px;
+      margin-bottom:18px;
+      color:#555;
+      font-size:14px;
+    }
+
+    .contact-item i{
+      width:20px;
+      color:#222;
+      margin-top:2px;
+      font-size:18px;
+    }
+
+    .profile-text{
+      margin-top:28px;
+      text-align:left;
+      color:#7a7a7a;
+      font-size:14px;
+      line-height:1.7;
+    }
+
+    .social{
+      margin-top:110px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:18px;
+      color:#222;
+      font-size:18px;
+    }
+
+    .social span{
+      font-size:14px;
+      color:#555;
+      margin-left:6px;
+    }
+
+    .r-section{
+      margin-bottom:70px;
+    }
+
+    .r-title{
+      text-align:center;
+      font-size:18px;
+      letter-spacing:4px;
+      color:#222;
+      font-weight:400;
+      position:relative;
+      padding-bottom:14px;
+      margin-bottom:35px;
+    }
+
+    .r-title::after{
+      content:"";
+      width:100%;
+      height:1px;
+      background:#444;
+      position:absolute;
+      left:0;
+      bottom:0;
+    }
+
+    .entry{
+      margin-bottom:42px;
+    }
+
+    .entry h3{
+      font-size:18px;
+      font-weight:400;
+      color:#2b2b2b;
+      margin-bottom:4px;
+    }
+
+    .meta{
+      font-size:14px;
+      color:#666;
+      margin-bottom:14px;
+      letter-spacing:0.5px;
+    }
+
+    .desc{
+      font-size:14px;
+      color:#7a7a7a;
+      line-height:1.7;
+    }
+
+    .languages{
+      font-size:15px;
+      color:#444;
+      line-height:1.8;
+    }
+
+    [contenteditable="true"]{
+      outline:none;
+    }
+
+    [contenteditable="true"]:hover{
+      background:rgba(0,0,0,0.03);
+    }
+
+    [contenteditable="true"]:focus{
+      background:rgba(0,0,0,0.05);
+      border-radius:4px;
+    }
+
+    #photoInput{
+      display:none;
+    }
+
+    @media(max-width:950px){
+      .resume{
+        width:95%;
+        flex-direction:column;
+      }
+      .left,.right{
+        width:100%;
+      }
+      .right{
+        padding:40px 30px;
+      }
+      .left{
+        padding:40px 30px;
+      }
+      .social{
+        margin-top:50px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="resume">
+    
+    <div class="left">
+      <div class="profile-img" onclick="document.getElementById('photoInput').click()">
+        <img id="profilePreview" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800&auto=format&fit=crop" alt="Profile">
+      </div>
+
+      <input type="file" id="photoInput" accept="image/*">
+
+      <div class="name" contenteditable="true">
+        SARA<br>WALTON
+      </div>
+
+      <div class="sub-title" contenteditable="true">
+        INDUSTRIAL DESIGNER
+      </div>
+
+      <div class="section-title">CONTACT</div>
+
+      <div class="contact">
+        <div class="contact-item">
+          <i class="fa-solid fa-phone"></i>
+          <div contenteditable="true">+2 434-232-534234</div>
+        </div>
+
+        <div class="contact-item">
+          <i class="fa-solid fa-envelope"></i>
+          <div contenteditable="true">sarawalton@mail.com</div>
+        </div>
+
+        <div class="contact-item">
+          <i class="fa-solid fa-desktop"></i>
+          <div contenteditable="true">sarawalton.com</div>
+        </div>
+
+        <div class="contact-item">
+          <i class="fa-solid fa-house"></i>
+          <div contenteditable="true">Main street # 32</div>
+        </div>
+      </div>
+
+      <div class="section-title">PROFILE</div>
+
+      <div class="profile-text" contenteditable="true">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus aliquam orci a ex molestie, eu ornare odio scelerisque. Nam eu metus fringilla, vulputate metus in, consequat nunc.
+      </div>
+
+      <div class="social">
+        <i class="fa-brands fa-twitter"></i>
+        <i class="fa-brands fa-facebook-f"></i>
+        <i class="fa-brands fa-linkedin-in"></i>
+        <span contenteditable="true">sarawalton92</span>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="r-section">
+        <div class="r-title">WORK EXPERIENCE</div>
+
+        <div class="entry">
+          <h3 contenteditable="true">Art Director</h3>
+          <div class="meta" contenteditable="true">Company Name | 2020</div>
+          <div class="desc" contenteditable="true">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus aliquam orci a ex molestie sit amet lorem ipsum dolor sit.
+          </div>
+        </div>
+
+        <div class="entry">
+          <h3 contenteditable="true">Art Director</h3>
+          <div class="meta" contenteditable="true">Company Name | 2020</div>
+          <div class="desc" contenteditable="true">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus aliquam orci a ex molestie sit amet lorem ipsum dolor sit.
+          </div>
+        </div>
+
+        <div class="entry">
+          <h3 contenteditable="true">Art Director</h3>
+          <div class="meta" contenteditable="true">Company Name | 2020</div>
+          <div class="desc" contenteditable="true">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus aliquam orci a ex molestie sit amet lorem ipsum dolor sit.
+          </div>
+        </div>
+      </div>
+
+      <div class="r-section">
+        <div class="r-title">EDUCATION</div>
+
+        <div class="entry">
+          <h3 contenteditable="true">Master Degree</h3>
+          <div class="meta" contenteditable="true">University Name | 2020 - 2021</div>
+          <div class="desc" contenteditable="true">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus aliquam orci a ex molestie sit amet lorem ipsum dolor sit.
+          </div>
+        </div>
+
+        <div class="entry">
+          <h3 contenteditable="true">Master Degree</h3>
+          <div class="meta" contenteditable="true">University Name | 2020 - 2021</div>
+          <div class="desc" contenteditable="true">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus aliquam orci a ex molestie sit amet lorem ipsum dolor sit.
+          </div>
+        </div>
+      </div>
+
+      <div class="r-section">
+        <div class="r-title">LANGUAGES</div>
+        <div class="languages" contenteditable="true">
+          English - Native<br>
+          Spanish - Professional<br>
+          Italian - Basic<br>
+          Mandarin - Basic
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const photoInput = document.getElementById("photoInput");
+    const profilePreview = document.getElementById("profilePreview");
+
+    photoInput.addEventListener("change", function(event){
+      const file = event.target.files[0];
+      if(file){
+        const reader = new FileReader();
+        reader.onload = function(e){
+          profilePreview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+
+</body>
+</html>

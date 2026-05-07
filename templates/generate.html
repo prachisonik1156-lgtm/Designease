@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DesignEase - AI Presentation Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='generate.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sora:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ── Back button — navbar right side ── */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            background: rgba(255,255,255,0.15);
+            color: #6366f1;
+            border: 1.5px solid #6366f1;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s, transform 0.15s;
+            white-space: nowrap;
+        }
+        .back-btn:hover {
+            background: #6366f1;
+            color: #fff;
+            transform: translateX(-3px);
+        }
+        .back-btn::before {
+            content: '←';
+            font-size: 16px;
+        }
+
+        /* ── Header layout fix ── */
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-center {
+            text-align: center;
+            flex: 1;
+        }
+
+        .header-center .subtitle {
+            margin-top: 4px;
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="background-gradient"></div>
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+
+        <header class="header">
+            <div class="header-content">
+
+                <!-- Left: Logo — same as dashboard -->
+                <div class="header-left">
+                    <div class="logo-container">
+                        <span class="star">✦</span>
+                        <span class="design">Design</span><span class="ease">Ease</span>
+                        <div class="swoosh"></div>
+                    </div>
+                </div>
+
+                <!-- Center: Subtitle -->
+                <div class="header-center">
+                    <p class="subtitle">Create stunning presentations in seconds with AI</p>
+                </div>
+
+                <!-- Right: Back Button -->
+                <a href="{{ url_for('dashboard') }}" class="back-btn">
+                    Dashboard
+                </a>
+
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="hero-section">
+                <div class="hero-content">
+                    <h2 class="hero-title">Transform Your Ideas Into Presentations</h2>
+                    <p class="hero-description">
+                        Enter a topic and let AI create a beautifully designed, professionally formatted
+                        presentation with images, content, and styling—all automatically.
+                    </p>
+                </div>
+            </section>
+
+            <section class="input-section">
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <input
+                            type="text"
+                            id="topicInput"
+                            class="topic-input"
+                            placeholder="e.g., Artificial Intelligence, Digital Marketing, Climate Change..."
+                            autocomplete="off"
+                        >
+                        <button id="generateBtn" class="generate-btn" onclick="generatePresentation()">
+                            <span class="btn-text">Generate Presentation</span>
+                            <span class="btn-icon">→</span>
+                        </button>
+                    </div>
+
+                    <div class="suggestions">
+                        <p class="suggestions-label">Try these topics:</p>
+                        <div class="suggestion-tags">
+                            <button class="suggestion-tag" data-topic="Artificial Intelligence">Artificial Intelligence</button>
+                            <button class="suggestion-tag" data-topic="Digital Marketing">Digital Marketing</button>
+                            <button class="suggestion-tag" data-topic="Remote Work Future">Remote Work Future</button>
+                            <button class="suggestion-tag" data-topic="Sustainable Technology">Sustainable Technology</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div id="loadingState" class="loading-state hidden">
+                <div class="loader">
+                    <div class="loader-circle"></div>
+                    <div class="loader-circle"></div>
+                    <div class="loader-circle"></div>
+                </div>
+                <p class="loading-text">Creating your presentation...</p>
+                <p class="loading-subtext">Generating slides and finding images</p>
+            </div>
+
+            <section id="featuresSection" class="features-section">
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">✨</div>
+                        <h3>AI-Powered Content</h3>
+                        <p>Intelligent slide generation with relevant, well-structured content</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎨</div>
+                        <h3>Professional Design</h3>
+                        <p>Modern layouts with beautiful typography and color schemes</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🖼️</div>
+                        <h3>Auto Images</h3>
+                        <p>Relevant images automatically fetched and placed on every slide</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">✏️</div>
+                        <h3>Full Editing</h3>
+                        <p>Edit any text, colors, images, and design with an intuitive editor</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Multiple Slides</h3>
+                        <p>Generate presentations with 6-8 expertly structured slides</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📥</div>
+                        <h3>Export Options</h3>
+                        <p>Download your presentation as PDF or export for further editing</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>DesignEase © 2024 | AI-Powered Presentation Generator</p>
+        </footer>
+    </div>
+
+    <script>
+        document.querySelectorAll('.suggestion-tag').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('topicInput').value = btn.dataset.topic;
+            });
+        });
+
+        document.getElementById('topicInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') generatePresentation();
+        });
+
+        async function generatePresentation() {
+            const topic = document.getElementById('topicInput').value.trim();
+            if (!topic) {
+                alert('Please enter a topic first.');
+                return;
+            }
+
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('featuresSection').style.display = 'none';
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = true;
+            btn.querySelector('.btn-text').textContent = 'Generating…';
+
+            try {
+                const res = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || 'Server error. Please try again.');
+                }
+                window.location.href = '/editorg/' + data.presentation_id;
+            } catch (err) {
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('featuresSection').style.display = '';
+                btn.disabled = false;
+                btn.querySelector('.btn-text').textContent = 'Generate Presentation';
+                alert('Error: ' + (err.message || 'Something went wrong.'));
+            }
+        }
+    </script>
+</body>
+</html>

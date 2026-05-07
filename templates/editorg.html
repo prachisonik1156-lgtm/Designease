@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DesignEase Editor - {{ presentation.topic }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='editorg.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ── Download buttons styling ── */
+        .download-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-pdf {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            background: linear-gradient(135deg, #2aa6a6, #1e8a8a);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-pdf:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(42,166,166,0.4);
+        }
+        .btn-ppt {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            background: linear-gradient(135deg, #d04a00, #e05a00);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-ppt:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(208,74,0,0.4);
+        }
+        .btn-ppt:disabled,
+        .btn-pdf:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ── Toast ── */
+        #dl-toast {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(60px);
+            background: #1a3333;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 9999;
+            transition: transform 0.35s ease, opacity 0.35s ease;
+            opacity: 0;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        #dl-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Header -->
+        <header class="editor-header">
+            <div class="header-left">
+                <a href="{{ url_for('generate')}}" class="back-btn">← Back</a>
+                <h1 class="presentation-title">{{ presentation.topic }}</h1>
+                <p class="slide-counter">Slide <span id="currentSlideNum">1</span> of <span id="totalSlides">{{ presentation.slides|length }}</span></p>
+            </div>
+            <div class="header-right">
+                <!-- Download group -->
+                <div class="download-group">
+                    <button id="downloadPdfBtn" class="btn-pdf" onclick="downloadPDF()">
+                        📥 Download PDF
+                    </button>
+                    <button id="downloadPptBtn" class="btn-ppt" onclick="downloadPPT()">
+                        📊 Download PPT
+                    </button>
+                </div>
+                <button id="helpBtn" class="header-btn help-btn" title="Help">?</button>
+            </div>
+        </header>
+
+        <!-- Main editor grid -->
+        <div class="editor-grid">
+            <!-- Left panel: Slide thumbnails -->
+            <aside class="left-panel">
+                <div class="panel-header">
+                    <h2>Slides</h2>
+                    <button id="addSlideBtn" class="add-slide-btn" title="Add new slide">+</button>
+                </div>
+                <div class="slides-list" id="slidesList"></div>
+            </aside>
+
+            <!-- Center panel: Slide preview -->
+            <main class="center-panel">
+                <div class="slide-container">
+                    <div class="slide-preview" id="slidePreview"></div>
+                    <div class="slide-navigation">
+                        <button id="prevBtn" class="nav-btn prev-btn" disabled>← Previous</button>
+                        <button id="nextBtn" class="nav-btn next-btn">Next →</button>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right panel: Editing tools -->
+            <aside class="right-panel">
+                <div class="panel-header">
+                    <h2>Edit Slide</h2>
+                </div>
+
+                <div class="edit-tabs">
+                    <button class="edit-tab active" data-tab="content">Content</button>
+                    <button class="edit-tab" data-tab="design">Design</button>
+                </div>
+
+                <!-- Content tab -->
+                <div class="tab-content active" id="contentTab">
+                    <div class="form-group">
+                        <label>Slide Title</label>
+                        <input type="text" id="slideTitle" class="form-input" placeholder="Enter slide title">
+                    </div>
+                    <div class="form-group">
+                        <label>Bullet Points</label>
+                        <div id="bulletPointsList" class="bullet-points-list"></div>
+                        <button id="addBulletBtn" class="btn-add-bullet">+ Add Bullet Point</button>
+                    </div>
+                    <div class="form-group">
+                        <label>Image</label>
+                        <div class="image-upload-area">
+                            <input type="file" id="imageUpload" accept="image/*" class="hidden-file-input">
+                            <button id="uploadImageBtn" class="btn-upload-image">📤 Upload Image</button>
+                            <button id="fetchImageBtn" class="btn-fetch-image">🔍 Fetch Image</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Design tab -->
+                <div class="tab-content" id="designTab">
+                    <div class="form-group">
+                        <label>Background Theme</label>
+                        <div class="theme-options">
+                            <button class="theme-btn active" data-theme="light" style="background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);"></button>
+                            <button class="theme-btn" data-theme="dark" style="background: linear-gradient(135deg, #1f2937 0%, #111827 100%);"></button>
+                            <button class="theme-btn" data-theme="gradient" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);"></button>
+                            <button class="theme-btn" data-theme="ocean" style="background: linear-gradient(135deg, #0369a1 0%, #06b6d4 100%);"></button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Text Color</label>
+                        <div class="color-options">
+                            <input type="color" id="textColor" class="color-picker" value="#1f2937">
+                            <span id="colorValue">#1f2937</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Font Style</label>
+                        <select id="fontStyle" class="form-select">
+                            <option value="modern">Modern (Space Grotesk)</option>
+                            <option value="classic">Classic (Sora)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Accent Color</label>
+                        <div class="color-options">
+                            <input type="color" id="accentColor" class="color-picker" value="#6366f1">
+                            <span id="accentColorValue">#6366f1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="deleteSlideBtn" class="btn-danger" style="margin-top: auto;">🗑️ Delete Slide</button>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="fetchImageModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Fetch Image</h2>
+                <button class="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="imageKeywords" class="form-input" placeholder="Enter keywords (e.g., 'artificial intelligence')">
+                <button id="searchImagesBtn" class="btn-primary" style="margin-top: 15px; width: 100%;">Search Images</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="helpModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Help & Shortcuts</h2>
+                <button class="modal-close">×</button>
+            </div>
+            <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+                <h4>Keyboard Shortcuts</h4>
+                <ul>
+                    <li><strong>←/→</strong> - Navigate between slides</li>
+                    <li><strong>Ctrl+S</strong> - Download PDF</li>
+                </ul>
+                <h4>Tips</h4>
+                <ul>
+                    <li>Edit slide titles and content directly in the right panel</li>
+                    <li>Upload your own images or fetch new ones from the web</li>
+                    <li>Customize colors and themes to match your brand</li>
+                    <li>Add or delete slides as needed</li>
+                    <li>Preview changes in real-time</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="dl-toast"></div>
+
+    <script>
+        window.presentationData = {{ presentation|tojson }};
+
+        const PID = window.presentationData.id;
+
+        function showToast(msg, duration = 3000) {
+            var t = document.getElementById('dl-toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(function() {
+                t.classList.remove('show');
+            }, duration);
+        }
+
+        // ── PDF Download ──
+        function downloadPDF() {
+            var btn = document.getElementById('downloadPdfBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Generating PDF...';
+            showToast('📥 Preparing PDF download...', 4000);
+
+            window.location.href = '/api/download-pdf/' + PID;
+
+            setTimeout(function() {
+                btn.disabled = false;
+                btn.innerHTML = '📥 Download PDF';
+                showToast('✅ PDF download started!');
+            }, 3000);
+        }
+
+        // ── PPT Download ──
+        function downloadPPT() {
+            var btn = document.getElementById('downloadPptBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Generating PPT...';
+            showToast('📊 Preparing PowerPoint file...', 4000);
+
+            window.location.href = '/api/download-ppt/' + PID;
+
+            setTimeout(function() {
+                btn.disabled = false;
+                btn.innerHTML = '📊 Download PPT';
+                showToast('✅ PPT download started!');
+            }, 3000);
+        }
+    </script>
+
+    <script src="{{ url_for('static', filename='js/editorg.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body{
+  background:#eef7f6;
+}
+
+/* NAVBAR */
+.navbar{
+  width:90%;
+  margin:30px auto;
+  background:#fff;
+  padding:18px 40px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  box-shadow:0 20px 40px rgba(0,0,0,0.08);
+}
+
+.logo{
+  font-weight:700;
+  font-size:20px;
+}
+
+nav a{
+  margin:0 15px;
+  text-decoration:none;
+  color:#333;
+  font-size:14px;
+}
+
+.nav-actions{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+
+.login{
+  text-decoration:none;
+  color:#333;
+  font-size:14px;
+}
+
+.signup{
+  background:#2aa6a6;
+  color:#fff;
+  padding:10px 20px;
+  border-radius:25px;
+  text-decoration:none;
+  font-size:14px;
+}
+
+/* HERO */
+.hero{
+  width:90%;
+  margin:60px auto;
+  background:#e6f4ef;
+  border-radius:30px;
+  padding:80px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.hero-left{
+  max-width:420px;
+}
+
+.hero-left h1{
+  font-size:42px;
+  font-weight:800;
+  line-height:1.2;
+  margin-bottom:20px;
+}
+
+.hero-left p{
+  font-size:15px;
+  color:#555;
+  margin-bottom:30px;
+}
+
+.cta{
+  display:inline-block;
+  background:#2aa6a6;
+  color:#fff;
+  padding:14px 34px;
+  border-radius:30px;
+  text-decoration:none;
+  font-weight:500;
+}
+
+/* RIGHT MOCK CARDS */
+.hero-right{
+  position:relative;
+  width:420px;
+  height:380px;
+}
+
+.card{
+  position:absolute;
+  background:#fff;
+  border-radius:16px;
+  box-shadow:0 15px 30px rgba(0,0,0,0.1);
+}
+
+.card-main{
+  width:260px;
+  height:340px;
+  left:0;
+  top:0;
+}
+
+.card img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:16px;
+}
+
+.card-side{
+  width:220px;
+  height:300px;
+  right:0;
+  top:40px;
+}

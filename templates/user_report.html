@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DesignEase — Usage Reports</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">D</div>
+    <span class="logo-text">DesignEase</span>
+    <span class="logo-badge">Admin</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Main</div>
+    <a href="{{ url_for('admin_dashboard') }}" class="nav-item"><i class="fas fa-chart-pie"></i> Dashboard</a>
+    <a href="{{ url_for('manage_templates') }}" class="nav-item"><i class="fas fa-layer-group"></i> Manage Templates</a>
+    <a href="{{ url_for('user_report') }}" class="nav-item active"><i class="fas fa-chart-bar"></i> Usage Reports</a>
+    <div class="nav-section-title">Management</div>
+    <a href="{{ url_for('admin_messages') }}" class="nav-item">
+    <i class="fas fa-envelope"></i> Messages
+    </a>
+    <a href="{{ url_for('ai_features') }}" class="nav-item"><i class="fas fa-robot"></i> AI Features</a>
+    <a href="/admin/users" class="nav-item"><i class="fas fa-users"></i> User Management</a>
+    <a href="{{ url_for('system_config') }}" class="nav-item"><i class="fas fa-sliders-h"></i> System Config</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-info">
+      <div class="admin-avatar">A</div>
+      <div><div class="admin-name">Administrator</div><div class="admin-role">Super Admin</div></div>
+    </div>
+    <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="top-header">
+    <div>
+      <span class="header-title">Usage Reports</span>
+      <span class="header-subtitle">Analytics & statistics</span>
+    </div>
+    <div class="header-actions">
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-outline btn-sm period-btn active" onclick="setPeriod('daily',this)">Daily</button>
+        <button class="btn btn-outline btn-sm period-btn" onclick="setPeriod('weekly',this)">Weekly</button>
+        <button class="btn btn-outline btn-sm period-btn" onclick="setPeriod('monthly',this)">Monthly</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+
+    <!-- SUMMARY STATS -->
+    <div class="stats-grid" style="margin-bottom:24px">
+      <div class="stat-card purple">
+        <div class="stat-top"><div class="stat-icon purple"><i class="fas fa-paint-brush"></i></div><span class="stat-change up">↑ 24%</span></div>
+        <div class="stat-value" data-count="1284">0</div>
+        <div class="stat-label">Designs Created</div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:82%"></div></div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-top"><div class="stat-icon green"><i class="fas fa-robot"></i></div><span class="stat-change up">↑ 31%</span></div>
+        <div class="stat-value" data-count="347">0</div>
+        <div class="stat-label">AI Presentations</div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:57%"></div></div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-top"><div class="stat-icon red"><i class="fas fa-download"></i></div><span class="stat-change up">↑ 18%</span></div>
+        <div class="stat-value" data-count="4520">0</div>
+        <div class="stat-label">Total Downloads</div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:74%"></div></div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-top"><div class="stat-icon yellow"><i class="fas fa-users"></i></div><span class="stat-change up">↑ 12%</span></div>
+        <div class="stat-value" data-count="{{ total_users if total_users is defined else 0 }}">0</div>
+        <div class="stat-label">Active Users</div>
+        <div class="stat-bar"><div class="stat-bar-fill" style="width:68%"></div></div>
+      </div>
+    </div>
+
+    <!-- MAIN CHART -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header">
+        <div class="card-title"><i class="fas fa-chart-line"></i> Activity Trends</div>
+        <span id="periodLabel" class="badge badge-purple">Daily</span>
+      </div>
+      <div class="card-body">
+        <canvas id="trendChart" height="80"></canvas>
+      </div>
+    </div>
+
+    <!-- 2 CHARTS -->
+    <div class="grid-2" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-chart-bar"></i> Template Usage</div>
+        </div>
+        <div class="card-body">
+          <canvas id="tplUsageChart" height="140"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-chart-pie"></i> User Growth</div>
+        </div>
+        <div class="card-body">
+          <canvas id="userGrowthChart" height="140"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOP TEMPLATES TABLE -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="fas fa-trophy"></i> Top Templates by Usage</div>
+      </div>
+      <div class="card-body" style="padding:0">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Template</th>
+              <th>Category</th>
+              <th>Downloads</th>
+              <th>Usage %</th>
+              <th>Trend</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% set tpl_stats = [
+              ('Resume Classic','resume',203,'84%','↑'),
+              ('Resume Modern','resume',187,'77%','↑'),
+              ('Hiking Poster','poster',142,'58%','→'),
+              ('Resume Creative','resume',134,'55%','↑'),
+              ('Business Workshop','poster',98,'40%','↓'),
+            ] %}
+            {% for name,cat,dl,pct,trend in tpl_stats %}
+            <tr>
+              <td style="color:var(--text-muted);font-weight:700">{{ loop.index }}</td>
+              <td style="font-weight:600">{{ name }}</td>
+              <td><span class="badge {{ 'badge-purple' if cat=='poster' else 'badge-green' }}">{{ cat.title() }}</span></td>
+              <td>{{ dl }}</td>
+              <td>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div class="progress-bar" style="flex:1;max-width:80px">
+                    <div class="progress-fill" style="width: {{ pct }}; background:var(--accent)"></div>
+                  </div>
+                  <span style="font-size:12px">{{ pct }}</span>
+                </div>
+              </td>
+              <td style="color: {{ 'var(--accent2)' if trend=='↑' else ('var(--accent3)' if trend=='↓' else 'var(--text-muted)') }};font-size:16px">{{ trend }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="admin-toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+const PERIODS = {
+  daily: {
+    label:'Daily',
+    labels:['12am','3am','6am','9am','12pm','3pm','6pm','9pm'],
+    designs:[4,2,8,18,24,31,27,19],
+    ai:[1,0,2,5,8,11,9,7]
+  },
+  weekly: {
+    label:'Weekly',
+    labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    designs:[42,68,55,89,74,103,91],
+    ai:[12,18,15,24,19,31,27]
+  },
+  monthly: {
+    label:'Monthly',
+    labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    designs:[180,240,210,290,320,410,380,450,420,490,460,520],
+    ai:[45,60,52,78,82,105,94,118,110,130,122,145]
+  }
+};
+
+let trendChart;
+function setPeriod(p, btn) {
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active','btn-primary'));
+  btn.classList.add('active','btn-primary');
+  document.getElementById('periodLabel').textContent = PERIODS[p].label;
+  const d = PERIODS[p];
+  if (trendChart) trendChart.destroy();
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  trendChart = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels:d.labels,
+      datasets:[
+        {label:'Designs',data:d.designs,borderColor:'#6c63ff',backgroundColor:'rgba(108,99,255,0.1)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#6c63ff'},
+        {label:'AI Presentations',data:d.ai,borderColor:'#00d4aa',backgroundColor:'rgba(0,212,170,0.08)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#00d4aa'}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true}}}
+  });
+}
+
+setPeriod('daily', document.querySelector('.period-btn'));
+
+// Template usage bar chart
+new Chart(document.getElementById('tplUsageChart').getContext('2d'),{
+  type:'bar',
+  data:{
+    labels:['Resume Classic','Resume Modern','Hiking Poster','Resume Creative','Workshop'],
+    datasets:[{
+      label:'Downloads',
+      data:[203,187,142,134,98],
+      backgroundColor:['rgba(108,99,255,0.8)','rgba(0,212,170,0.8)','rgba(255,107,107,0.8)','rgba(255,217,61,0.8)','rgba(108,99,255,0.5)'],
+      borderRadius:6
+    }]
+  },
+  options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+});
+
+// User growth chart
+new Chart(document.getElementById('userGrowthChart').getContext('2d'),{
+  type:'line',
+  data:{
+    labels:['Jan','Feb','Mar','Apr','May','Jun'],
+    datasets:[{
+      label:'New Users',
+      data:[12,19,15,27,24,31],
+      borderColor:'#ff6b6b',
+      backgroundColor:'rgba(255,107,107,0.1)',
+      fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#ff6b6b'
+    }]
+  },
+  options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+});
+</script>
+</body>
+</html>

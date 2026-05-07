@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DesignEase – AI Design Platform</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600&display=swap" rel="stylesheet">
+    <style>
+        #login-toast {
+            position: fixed; top: 30px; left: 50%;
+            transform: translateX(-50%) translateY(-80px);
+            background: #22c55e; color: #fff;
+            padding: 14px 28px; border-radius: 10px;
+            font-size: 15px; font-weight: 600;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+            z-index: 9999;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            opacity: 0; pointer-events: none;
+        }
+        #login-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        .profile-wrap { position: relative; }
+        .profile { cursor: pointer; user-select: none; transition: transform 0.15s, box-shadow 0.15s; }
+        .profile:hover { transform: scale(1.08); box-shadow: 0 4px 16px rgba(42,166,166,0.4); }
+
+        .profile-popup {
+            display: none; position: fixed; left: 80px; bottom: 20px;
+            width: 210px; background: #eef7f6; border-radius: 14px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.13); z-index: 1100;
+            overflow: hidden; animation: popIn 0.2s ease;
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: translateX(-8px) scale(0.96); }
+            to   { opacity: 1; transform: translateX(0) scale(1); }
+        }
+        .profile-popup.show { display: block; }
+        .popup-inner { padding: 16px 14px; display: flex; align-items: center; gap: 12px; }
+        .popup-avatar {
+            width: 40px; height: 40px; border-radius: 50%; background: #2aa6a6;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px; font-weight: 800; color: #fff;
+            font-family: 'Outfit', sans-serif; flex-shrink: 0;
+        }
+        .popup-name { font-size: 14px; font-weight: 700; color: #1a3333; line-height: 1.3; }
+        .popup-email { font-size: 11px; color: #4a8a8a; margin-top: 3px; word-break: break-all; line-height: 1.4; }
+
+        /* ── Templates Panel ── */
+        #tplOverlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.35); z-index: 1000;
+            backdrop-filter: blur(3px);
+        }
+        #tplOverlay.show { display: block; }
+
+        #tplPanel {
+            position: fixed;
+            left: 0px;   /* sidebar width ke baad */
+            top: 0; bottom: 0;
+            width: 300px;
+            background: #fff;
+            box-shadow: 4px 0 32px rgba(0,0,0,0.15);
+            z-index: 1001; overflow-y: auto;
+            transform: translateX(-400%);
+            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+            padding: 24px 18px;
+        }
+        #tplPanel.show { transform: translateX(0); }
+
+        .tpl-panel-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 18px;
+        }
+        .tpl-panel-header h2 { font-size: 17px; font-weight: 800; color: #1a3333; }
+        .tpl-close-btn {
+            width: 30px; height: 30px; border: none;
+            background: #f3f4f6; border-radius: 8px;
+            cursor: pointer; font-size: 15px;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s;
+        }
+        .tpl-close-btn:hover { background: #e5e7eb; }
+
+        .tpl-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+        .tf-btn {
+            padding: 5px 12px; border-radius: 20px;
+            border: 1.5px solid #c8e8e5; background: #fff;
+            color: #2aa6a6; font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; font-family: inherit;
+        }
+        .tf-btn:hover, .tf-btn.active { background: #2aa6a6; color: #fff; border-color: #2aa6a6; }
+
+        .tpl-count { font-size: 11px; color: #9ca3af; margin-bottom: 12px; }
+
+        .tpl-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 12px; border-radius: 12px;
+            border: 1.5px solid #e5e7eb; margin-bottom: 8px;
+            cursor: pointer; transition: all 0.2s; text-decoration: none; background: #fff;
+        }
+        .tpl-item:hover {
+            border-color: #2aa6a6; transform: translateX(3px);
+            box-shadow: 0 3px 12px rgba(42,166,166,0.12);
+        }
+        .tpl-thumb-sm {
+            width: 52px; height: 52px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0;
+        }
+        .tpl-name-sm { font-size: 13px; font-weight: 700; color: #1a3333; }
+        .tpl-cat-sm {
+            font-size: 10px; color: #2aa6a6; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;
+        }
+
+        #projOverlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.35); z-index: 1000;
+    backdrop-filter: blur(3px);
+    }
+    #projOverlay.show { display: block; }
+
+    #projPanel {
+    position: fixed;
+    left: 0px; top: 0; bottom: 0;
+    width: 300px; background: #fff;
+    box-shadow: 4px 0 32px rgba(0,0,0,0.15);
+    z-index: 1001; overflow-y: auto;
+    transform: translateX(-400%);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    padding: 24px 18px;
+    }
+    #projPanel.show { transform: translateX(0); }
+
+    .proj-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 12px; border-radius: 12px;
+    border: 1.5px solid #e5e7eb; margin-bottom: 8px;
+    cursor: pointer; transition: all 0.2s; text-decoration: none;
+    background: #fff;
+    }
+    .proj-item:hover {
+    border-color: #2aa6a6; transform: translateX(3px);
+    box-shadow: 0 3px 12px rgba(42,166,166,0.12);
+    }
+    .proj-thumb {
+    width: 52px; height: 52px; border-radius: 10px;
+    background: #f3f4f6; overflow: hidden; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    }
+    .proj-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .proj-name { font-size: 13px; font-weight: 700; color: #1a3333; }
+    .proj-date { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+
+        /* Category cards hover */
+        .cat { cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="login-toast">✅ Welcome!</div>
+
+<!-- Profile Popup -->
+<div class="profile-popup" id="profilePopup">
+    <div class="popup-inner">
+        <div class="popup-avatar">{{ (session.get('user','U')|string)[0]|upper }}</div>
+        <div>
+            <div class="popup-name">{{ session.get('user', 'User') }}</div>
+            <div class="popup-email" id="popupEmail">Loading...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Templates Overlay -->
+<div id="tplOverlay" onclick="closeTemplates()"></div>
+
+<!-- Templates Panel -->
+<div id="tplPanel">
+    <div class="tpl-panel-header">
+        <h2>🧩 Templates</h2>
+        <button class="tpl-close-btn" onclick="closeTemplates()">✕</button>
+    </div>
+    <div class="tpl-filters">
+        <button class="tf-btn active" onclick="filterTpl('all',this)">All</button>
+        <button class="tf-btn" onclick="filterTpl('poster',this)">Poster</button>
+        <button class="tf-btn" onclick="filterTpl('resume',this)">Resume</button>
+        <button class="tf-btn" onclick="filterTpl('presentation',this)">Slides</button>
+        <button class="tf-btn" onclick="filterTpl('social',this)">Social</button>
+        <button class="tf-btn" onclick="filterTpl('travel',this)">Travel</button>
+    </div>
+    <div class="tpl-count" id="tplCount"></div>
+    <div id="tplList"></div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="side-item active">
+        <a href="{{ url_for('create_design_redirect') }}">
+            <button><span>➕</span><span class="btn-label">Create</span></button>
+        </a>
+    </div>
+    <div class="side-divider"></div>
+    <div class="side-item">
+        <a href="{{ url_for('index') }}">
+            <button><span>🏠</span><span class="btn-label">Home</span></button>
+        </a>
+    </div>
+    <div class="side-item">
+        <a href="#" onclick="openProjects(event)">
+            <button><span>📁</span><span class="btn-label">Projects</span></button>
+        </a>
+    </div>
+    <div class="side-item">
+        <a href="#" onclick="openTemplates(event,'all')">
+            <button><span>🧩</span><span class="btn-label">Templates</span></button>
+        </a>
+    </div>
+    <div class="side-item">
+        <a href="{{ url_for('generate') }}">
+            <button><span>🤖</span><span class="btn-label">AI</span></button>
+        </a>
+    </div>
+    <div class="side-bottom">
+        <div class="profile-wrap">
+            <div class="profile" id="profileBtn" onclick="togglePopup()">
+                {{ (session.get('user','U')|string)[0]|upper }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navbar -->
+<div class="navbar">
+    <div class="logo-container">
+        <span class="star">✦</span>
+        <span class="design">Design</span><span class="ease">Ease</span>
+        <div class="swoosh"></div>
+    </div>
+    <div class="nav-actions">
+        <a href="{{ url_for('logout') }}"><button>Logout</button></a>
+    </div>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+    <h1>What will you design with AI today?</h1>
+    <p>Canva-like editing + AI-powered presentations & reports — all in one platform.</p>
+    <div class="search-box">
+        <input type="text" placeholder="Search templates or type topic to generate with AI">
+        <a href="{{ url_for('create_design_redirect') }}"><button>Start Designing</button></a>
+    </div>
+    <div class="categories">
+        <!-- Category click = filtered panel open -->
+        <div class="cat" onclick="openTemplates(event,'presentation')">📊<span>Presentation</span></div>
+        <div class="cat" onclick="openTemplates(event,'resume')">📄<span>Resume</span></div>
+        <div class="cat" onclick="openTemplates(event,'poster')">🎨<span>Poster</span></div>
+        <div class="cat" onclick="openTemplates(event,'social')">📱<span>Social</span></div>
+         <div class="cat" onclick="openTemplates(event,'travel')">✈️<span>Travel</span></div>
+        
+    </div>
+</section>
+
+<!-- Templates section -->
+<section class="templates">
+    <h2>Explore Smart Templates</h2>
+    <div class="template-grid">
+        <div class="card" onclick="openTemplates(event,'presentation')" style="cursor:pointer"><div class="icon">📄</div><p>Project Report Templates</p></div>
+        <div class="card" onclick="openTemplates(event,'resume')" style="cursor:pointer"><div class="icon">👤</div><p>Resume Builder</p></div>
+        <div class="card" onclick="openTemplates(event,'poster')" style="cursor:pointer"><div class="icon">🎨</div><p>Poster Designs</p></div>
+        <div class="card" onclick="openTemplates(event,'social')" style="cursor:pointer"><div class="icon">📱</div><p>Social Media Posts</p></div>
+    </div>
+</section>
+
+<!-- Projects Overlay -->
+<div id="projOverlay" onclick="closeProjects()"></div>
+
+<!-- Projects Panel -->
+<div id="projPanel">
+    <div class="tpl-panel-header">
+        <h2>📁 My Projects</h2>
+        <button class="tpl-close-btn" onclick="closeProjects()">✕</button>
+    </div>
+    <div id="projList">
+        <div style="text-align:center;padding:40px 20px;color:#9ca3af">
+            <div style="font-size:36px;margin-bottom:12px">⏳</div>
+            Loading...
+        </div>
+    </div>
+</div>
+
+<script>
+// ── Profile Popup ──
+var emailFetched = false;
+function togglePopup() {
+    var popup = document.getElementById('profilePopup');
+    popup.classList.toggle('show');
+    if (popup.classList.contains('show') && !emailFetched) fetchUserInfo();
+}
+document.addEventListener('click', function(e) {
+    var popup = document.getElementById('profilePopup');
+    var btn   = document.getElementById('profileBtn');
+    if (popup.classList.contains('show') &&
+        !popup.contains(e.target) && !btn.contains(e.target)) {
+        popup.classList.remove('show');
+    }
+});
+async function fetchUserInfo() {
+    var el = document.getElementById('popupEmail');
+    try {
+        var res  = await fetch('/api/user-info');
+        var data = await res.json();
+        el.textContent = data.email || 'Not available';
+        emailFetched = true;
+    } catch(e) { el.textContent = 'Not available'; }
+}
+
+// ── Templates Panel ──
+var TEMPLATES = [
+    {id:'poster1',       name:'Hiking Poster',       cat:'poster',       icon:'🏔️', bg:'linear-gradient(135deg,#ead7b5,#f5e9d6)'},
+    {id:'poster2',       name:'Business Workshop',   cat:'poster',       icon:'💼', bg:'linear-gradient(135deg,#1a1a2e,#16213e)'},
+    {id:'poster3',       name:'Creative Poster',     cat:'poster',       icon:'🎨', bg:'linear-gradient(135deg,#f093fb,#f5576c)'},
+    {id:'poster4',       name:'Event Poster',        cat:'poster',       icon:'🎉', bg:'linear-gradient(135deg,#4facfe,#00f2fe)'},
+    {id:'resume1',       name:'Resume Classic',      cat:'resume',       icon:'📄', bg:'linear-gradient(135deg,#1f2937,#374151)'},
+    {id:'resume2',       name:'Resume Modern',       cat:'resume',       icon:'✨', bg:'linear-gradient(135deg,#667eea,#764ba2)'},
+    {id:'resume3',       name:'Resume Creative',     cat:'resume',       icon:'🎭', bg:'linear-gradient(135deg,#f7971e,#ffd200)'},
+    {id:'resume4',       name:'Resume Minimal',      cat:'resume',       icon:'📋', bg:'linear-gradient(135deg,#2d3748,#4a5568)'},
+    {id:'index45',       name:'Resume with Photo',   cat:'resume',       icon:'📸', bg:'linear-gradient(135deg,#e2e8f0,#f7fafc)'},
+    {id:'presentation1', name:'Corporate Dark',      cat:'presentation', icon:'📊', bg:'linear-gradient(135deg,#1a1a2e,#0f3460)'},
+    {id:'social1',       name:'Food Instagram Post', cat:'social',       icon:'🍽️', bg:'linear-gradient(135deg,#f59e0b,#ef4444)'},
+    {id:'social2',       name:'Quote Post Dark',     cat:'social',       icon:'💬', bg:'linear-gradient(135deg,#0f0c29,#302b63)'},
+    {id:'travel1',       name:'Destination Card',    cat:'travel',       icon:'✈️', bg:'linear-gradient(135deg,#0369a1,#0d9488)'},
+    {id:'travel2',       name:'Tour Package',        cat:'travel',       icon:'🌍', bg:'linear-gradient(135deg,#2aa6a6,#1e8a8a)'},
+];
+
+function openTemplates(e, cat) {
+    if (e) e.preventDefault();
+    cat = cat || 'all';
+
+    document.getElementById('tplOverlay').classList.add('show');
+    document.getElementById('tplPanel').classList.add('show');
+
+    // Sahi filter button active karo
+    document.querySelectorAll('.tf-btn').forEach(function(b) {
+        b.classList.remove('active');
+        var txt = b.textContent.toLowerCase().trim();
+        if (txt === cat || (cat === 'all' && txt === 'all') ||
+            (cat === 'presentation' && txt === 'slides')) {
+            b.classList.add('active');
+        }
+    });
+
+    renderTpl(cat);
+}
+
+function closeTemplates() {
+    document.getElementById('tplOverlay').classList.remove('show');
+    document.getElementById('tplPanel').classList.remove('show');
+}
+
+function filterTpl(cat, btn) {
+    document.querySelectorAll('.tf-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    renderTpl(cat);
+}
+
+function openProjects(e) {
+    if (e) e.preventDefault();
+    document.getElementById('projOverlay').classList.add('show');
+    document.getElementById('projPanel').classList.add('show');
+    loadProjects();
+}
+
+function closeProjects() {
+    document.getElementById('projOverlay').classList.remove('show');
+    document.getElementById('projPanel').classList.remove('show');
+}
+
+async function loadProjects() {
+    var list = document.getElementById('projList');
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:#9ca3af"><div style="font-size:36px;margin-bottom:12px">⏳</div>Loading...</div>';
+    try {
+        var res  = await fetch('/api/designs');
+        var data = await res.json();
+        var designs = data.designs || [];
+        if (!designs.length) {
+            list.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#9ca3af"><div style="font-size:40px;margin-bottom:12px">🎨</div><div style="font-size:14px;font-weight:600;margin-bottom:6px">No designs yet</div><div style="font-size:12px">Create your first design!</div></div>';
+            return;
+        }
+        list.innerHTML = designs.map(function(d) {
+            var thumb = d.thumbnail
+                ? '<img src="' + d.thumbnail + '" alt="">'
+                : '<span>🎨</span>';
+            var date = d.updated_at ? d.updated_at.slice(0,10) : '';
+            return '<div class="proj-item" id="proj-' + d.id + '">' +
+                '<a href="/editor/' + d.id + '" style="display:flex;align-items:center;gap:12px;flex:1;text-decoration:none">' +
+                '<div class="proj-thumb">' + thumb + '</div>' +
+                '<div><div class="proj-name">' + (d.name || 'Untitled') + '</div>' +
+                '<div class="proj-date">' + date + '</div></div></a>' +
+                '<button onclick="deleteProject(' + d.id + ')" title="Delete" ' +
+                'style="border:none;background:none;cursor:pointer;color:#9ca3af;' +
+                'font-size:16px;padding:4px 8px;border-radius:6px;transition:all 0.2s;flex-shrink:0" ' +
+                'onmouseover="this.style.background=\'#fef2f2\';this.style.color=\'#ef4444\'" ' +
+                'onmouseout="this.style.background=\'none\';this.style.color=\'#9ca3af\'">🗑️</button>' +
+                '</div>';
+        }).join('');
+    } catch(e) {
+        list.innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444">Load nahi hua</div>';
+    }
+}
+
+async function deleteProject(id) {
+    if (!confirm('Do you want to delete this design?')) return;
+    try {
+        var res  = await fetch('/api/designs/' + id, { method: 'DELETE' });
+        var data = await res.json();
+        if (data.success) {
+            var row = document.getElementById('proj-' + id);
+            if (row) {
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(20px)';
+                row.style.transition = 'all 0.3s';
+                setTimeout(function() { row.remove(); }, 300);
+            }
+        }
+    } catch(e) {
+        alert('Delete nahi hua. Dobara try karo.');
+    }
+}
+
+function renderTpl(cat) {
+    var list = cat === 'all' ? TEMPLATES : TEMPLATES.filter(function(t) { return t.cat === cat; });
+    document.getElementById('tplCount').textContent = list.length + ' template' + (list.length !== 1 ? 's' : '');
+    document.getElementById('tplList').innerHTML = list.map(function(t) {
+        return '<a class="tpl-item" href="/editor?template=' + t.id + '">' +
+            '<div class="tpl-thumb-sm" style="background:' + t.bg + '">' + t.icon + '</div>' +
+            '<div><div class="tpl-name-sm">' + t.name + '</div>' +
+            '<div class="tpl-cat-sm">' + t.cat + '</div></div></a>';
+    }).join('');
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeTemplates();
+});
+</script>
+
+{% set flash_type = session.get('_login_flash') %}
+{% if flash_type in ['user', 'signup'] %}
+<script>
+  fetch('/clear-login-flash', { method: 'POST' });
+  var messages = {
+    'user':   '✅ Login successful! Welcome back.',
+    'signup': '🎉 Account created! Welcome to DesignEase.'
+  };
+  window.addEventListener('DOMContentLoaded', function () {
+    var t = document.getElementById('login-toast');
+    t.innerHTML = messages['{{ flash_type }}'];
+    t.classList.add('show');
+    setTimeout(function () {
+      t.style.opacity = '0';
+      t.style.transform = 'translateX(-50%) translateY(-80px)';
+      setTimeout(function () { t.classList.remove('show'); }, 400);
+    }, 3000);
+  });
+</script>
+{% endif %}
+
+</body>
+</html>

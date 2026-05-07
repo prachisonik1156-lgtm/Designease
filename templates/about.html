@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us — DesignEase</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,800;1,600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#eef7f6;
+  --bg2:#def7f3;
+  --card:rgb(34,99,99);
+  --teal:#226363;
+  --teal2:#2aa8a8;
+  --teal3:rgba(34,99,99,0.08);
+  --accent:#6c63ff;
+  --pink:#ff6584;
+  --t1:#1a4444;
+  --t2:#3d7070;
+  --t3:#6b9999;
+  --border:rgba(34,99,99,0.13);
+  --white:#fff;
+  --r:14px;
+}
+
+html{scroll-behavior:smooth}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--t1);overflow-x:hidden}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--teal2);border-radius:99px}
+
+/* NAV */
+nav{
+  position:sticky;top:0;z-index:99;
+  background:rgba(238,247,246,0.92);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border);
+  height:60px;display:flex;align-items:center;
+  padding:0 5%;justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.logo-sq{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--teal),var(--accent));
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-family:'Playfair Display',serif;font-size:15px;font-weight:800;
+}
+.logo span{font-family:'Playfair Display',serif;font-size:16px;font-weight:800;color:var(--teal)}
+.nav-links{display:flex;align-items:center;gap:24px}
+.nav-links a{text-decoration:none;font-size:13.5px;font-weight:500;color:var(--t2);transition:color .2s}
+.nav-links a:hover,.nav-links a.on{color:var(--teal)}
+.nav-links a.on{font-weight:600}
+.nbtn{
+  background:var(--teal);color:#fff!important;
+  padding:7px 18px;border-radius:99px;font-weight:600!important;font-size:13px!important;
+}
+.nbtn:hover{opacity:.88}
+
+/* HERO — SPLIT */
+.hero{
+  display:grid;grid-template-columns:1fr 1fr;
+  min-height:420px;
+}
+.hero-left{
+  background:var(--card);
+  padding:72px 5% 60px;
+  display:flex;flex-direction:column;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.hero-left::after{
+  content:'';position:absolute;
+  width:320px;height:320px;border-radius:50%;
+  background:rgba(108,99,255,0.12);
+  top:-80px;right:-80px;pointer-events:none;
+}
+.pill{
+  display:inline-block;
+  background:rgba(255,255,255,0.12);
+  border:1px solid rgba(255,255,255,0.2);
+  color:rgba(255,255,255,0.85);
+  padding:4px 13px;border-radius:99px;
+  font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  margin-bottom:20px;width:fit-content;
+}
+.hero-left h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(28px,4vw,44px);
+  font-weight:800;line-height:1.2;
+  color:#fff;margin-bottom:18px;
+  position:relative;z-index:1;
+}
+.hero-left h1 em{font-style:italic;color:#a8d8d8}
+.hero-left p{font-size:14px;color:rgba(255,255,255,0.7);line-height:1.78;max-width:400px;position:relative;z-index:1}
+
+.hero-right{
+  background:var(--bg2);
+  padding:72px 5% 60px;
+  display:flex;flex-direction:column;justify-content:center;
+  gap:20px;
+}
+.info-row{
+  display:flex;align-items:flex-start;gap:14px;
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:18px 20px;
+  transition:all .22s;
+}
+.info-row:hover{transform:translateX(4px);border-color:rgba(34,99,99,.28);box-shadow:0 4px 18px rgba(34,99,99,.09)}
+.ir-icon{
+  width:40px;height:40px;flex-shrink:0;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.ic-t{background:rgba(34,99,99,.1)}
+.ic-p{background:rgba(108,99,255,.1)}
+.ic-k{background:rgba(255,101,132,.1)}
+.ir-text h4{font-size:14px;font-weight:600;color:var(--teal);margin-bottom:3px}
+.ir-text p{font-size:12.5px;color:var(--t2);line-height:1.65}
+
+/* FEATURES */
+.features{padding:70px 5%}
+.s-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--teal2);margin-bottom:8px}
+.s-title{font-family:'Playfair Display',serif;font-size:clamp(22px,3vw,32px);font-weight:800;color:var(--teal);margin-bottom:10px}
+.s-desc{font-size:14px;color:var(--t2);line-height:1.75;max-width:480px;margin-bottom:36px}
+
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feat-card{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:24px 20px;
+  transition:all .22s;
+  border-top:3px solid transparent;
+}
+.feat-card:nth-child(1){border-top-color:var(--teal)}
+.feat-card:nth-child(2){border-top-color:var(--accent)}
+.feat-card:nth-child(3){border-top-color:var(--pink)}
+.feat-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(34,99,99,.1)}
+.feat-card .ico{font-size:28px;margin-bottom:12px}
+.feat-card h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--teal);margin-bottom:8px}
+.feat-card p{font-size:12.5px;color:var(--t2);line-height:1.7}
+
+/* TECH */
+.tech{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:56px 5%}
+.tech-wrap{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.t-chip{
+  display:flex;align-items:center;gap:7px;
+  background:var(--white);border:1px solid var(--border);
+  border-radius:99px;padding:7px 16px;
+  font-size:13px;font-weight:500;color:var(--t1);
+  transition:all .2s;cursor:default;
+}
+.t-chip:hover{background:var(--card);color:#fff;border-color:var(--card);transform:translateY(-2px)}
+.t-chip .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dc1{background:var(--teal)}
+.dc2{background:var(--accent)}
+.dc3{background:var(--pink)}
+.dc4{background:#f7971e}
+.dc5{background:#43e97b}
+
+/* TEAM */
+.team{padding:70px 5%}
+.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:32px}
+.t-card{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  overflow:hidden;
+  transition:all .22s;
+  text-align:center;
+}
+.t-card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(34,99,99,.12)}
+.t-top{
+  height:100px;display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;
+  font-size:30px;font-weight:800;color:#fff;
+  position:relative;overflow:hidden;
+}
+.t-top::after{
+  content:'';position:absolute;
+  width:80px;height:80px;border-radius:50%;
+  background:rgba(255,255,255,.1);
+  bottom:-20px;right:-10px;
+}
+.bg1{background:linear-gradient(135deg,#226363,#2aa8a8)}
+.bg2{background:linear-gradient(135deg,#6c63ff,#8b5cf6)}
+.bg3{background:linear-gradient(135deg,#ff6584,#ff9a9e)}
+.bg4{background:linear-gradient(135deg,#43e97b,#1a7a3c)}
+.t-body{padding:16px 14px}
+.t-body h4{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--teal);margin-bottom:3px}
+.t-role{font-size:10.5px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px}
+.t-body p{font-size:12px;color:var(--t2);line-height:1.6}
+
+/* FOOTER */
+footer{
+  background:var(--bg2);border-top:1px solid var(--border);
+  padding:22px 5%;text-align:center;
+  font-size:12.5px;color:var(--t3);
+}
+footer a{color:var(--teal);text-decoration:none;font-weight:500}
+footer a:hover{text-decoration:underline}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .feat-grid{grid-template-columns:1fr}
+  .team-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  .nav-links{display:none}
+  .team-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">
+    <div class="logo-sq">✦</div>
+    <span>DesignEase</span>
+  </a>
+  <div class="nav-links">
+    <a href="{{ url_for('index') }}">Home</a>
+    <a href="{{ url_for('about') }}" class="on">About</a>
+    <a href="{{ url_for('contact') }}">Contact</a>
+    <a href="#">Templates</a>
+    <a href="{{ url_for('dashboard') }}" class="nbtn">Get Started</a>
+  </div>
+</nav>
+
+<!-- HERO SPLIT -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="pill">🎓 College Project</div>
+    <h1>Designing Made<br><em>Simple</em> for All</h1>
+    <p>DesignEase is a final year college project — a web-based platform where anyone can create stunning posters, resumes, and presentations using templates and AI, no design experience needed.</p>
+  </div>
+  <div class="hero-right">
+    <div class="info-row">
+      <div class="ir-icon ic-t">🎯</div>
+      <div class="ir-text">
+        <h4>Our Goal</h4>
+        <p>Build a practical, easy-to-use design tool that solves a real problem — making design accessible for students and beginners.</p>
+      </div>
+    </div>
+    <div class="info-row">
+      <div class="ir-icon ic-p">📚</div>
+      <div class="ir-text">
+        <h4>Academic Purpose</h4>
+        <p>Developed as part of our final year academic project, applying full-stack web development concepts learned during our course.</p>
+      </div>
+    </div>
+    <div class="info-row">
+      <div class="ir-icon ic-k">⚙️</div>
+      <div class="ir-text">
+        <h4>What We Learned</h4>
+        <p>Flask backend, SQLite database, REST APIs, AI integration, admin dashboards, and real-world project planning.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="s-label">Core Features</div>
+  <h2 class="s-title">What DesignEase Offers</h2>
+  <p class="s-desc">Three main features that make up the platform, each built and integrated by our team.</p>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="ico">🖼️</div>
+      <h3>Template Library</h3>
+      <p>A collection of ready-to-use templates for posters, resumes, and presentations. Users can browse, select, and download — all managed through the admin panel.</p>
+    </div>
+    <div class="feat-card">
+      <div class="ico">🤖</div>
+      <h3>AI Presentation Generator</h3>
+      <p>Users type a topic and the AI automatically generates a complete, structured presentation. Powered by an AI API and managed by the admin with on/off controls.</p>
+    </div>
+    <div class="feat-card">
+      <div class="ico">🛡️</div>
+      <h3>Admin Dashboard</h3>
+      <p>A full control panel for managing users, templates, AI settings, and viewing real-time usage reports with charts and analytics.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<section class="tech">
+  <div class="s-label">Tech Stack</div>
+  <h2 class="s-title">Technologies We Used</h2>
+  <p class="s-desc">Every tool in this project was chosen to match what we've studied in our curriculum.</p>
+  <div class="tech-wrap">
+    <div class="t-chip"><div class="dot dc1"></div>Python</div>
+    <div class="t-chip"><div class="dot dc1"></div>Flask</div>
+    <div class="t-chip"><div class="dot dc5"></div>SQLite</div>
+    <div class="t-chip"><div class="dot dc2"></div>HTML5</div>
+    <div class="t-chip"><div class="dot dc2"></div>CSS3</div>
+    <div class="t-chip"><div class="dot dc4"></div>JavaScript</div>
+    <div class="t-chip"><div class="dot dc4"></div>Chart.js</div>
+    <div class="t-chip"><div class="dot dc3"></div>AI API</div>
+    <div class="t-chip"><div class="dot dc5"></div>Jinja2</div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="team">
+  <div class="s-label">Project Team</div>
+  <h2 class="s-title">Meet the Developers</h2>
+  <p class="s-desc">Four students, one project — each handling a different part of the system.</p>
+  <div class="team-grid">
+    <div class="t-card">
+      <div class="t-top bg1">R</div>
+      <div class="t-body">
+        <h4>Rahul Patel</h4>
+        <div class="t-role">Backend Dev</div>
+        <p>Flask routes, SQLite database design & admin panel logic.</p>
+      </div>
+    </div>
+    <div class="t-card">
+      <div class="t-top bg2">P</div>
+      <div class="t-body">
+        <h4>Priya Shah</h4>
+        <div class="t-role">Frontend Dev</div>
+        <p>All HTML/CSS pages, UI design and user experience flow.</p>
+      </div>
+    </div>
+    <div class="t-card">
+      <div class="t-top bg3">A</div>
+      <div class="t-body">
+        <h4>Ankit Mehta</h4>
+        <div class="t-role">AI Integration</div>
+        <p>AI API setup, presentation generator and testing.</p>
+      </div>
+    </div>
+    <div class="t-card">
+      <div class="t-top bg4">S</div>
+      <div class="t-body">
+        <h4>Shruti Joshi</h4>
+        <div class="t-role">Docs & Testing</div>
+        <p>Project report, bug testing and final presentation slides.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2024 DesignEase &nbsp;—&nbsp; Final Year College Project &nbsp;|&nbsp; <a href="about.html">About</a> &nbsp;|&nbsp; <a href="contact.html">Contact Us</a></p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,213 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Segoe UI, Arial, sans-serif;
+}
+
+body {
+    height: 100vh;
+    background: #eef7f6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    width: 950px;
+    height: 520px;
+    background: #fff;
+    border-radius: 22px;
+    display: flex;
+    overflow: hidden;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* LEFT SIDE */
+.left {
+    width: 40%;
+    padding: 50px 50px;
+}
+
+.left h1 {
+    color: #2aa6a6;
+    margin-bottom: 10px;
+}
+
+.left h3 {
+    margin-bottom: 25px;
+    letter-spacing: 2px;
+}
+
+/* Normal email input — same as original */
+.left input[type="email"] {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 30px;
+    border: 1px solid #ccc;
+    margin-bottom: 16px;
+    font-size: 15px;
+    outline: none;
+}
+
+.left input[type="email"]:focus {
+    border-color: #2aa6a6;
+}
+
+/* Password wrapper — for eye icon */
+.pw-wrap {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.pw-wrap input {
+    width: 100%;
+    padding: 14px 44px 14px 18px;
+    border-radius: 30px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    outline: none;
+}
+
+.pw-wrap input:focus {
+    border-color: #2aa6a6;
+}
+
+.pw-wrap input::placeholder {
+    color: #aaa;
+}
+
+/* Eye icon */
+.eye {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 16px;
+    opacity: 0.5;
+    user-select: none;
+}
+
+.eye:hover { opacity: 0.9; }
+
+/* Error message */
+.error-msg {
+    color: #e53e3e;
+    font-size: 12px;
+    text-align: center;
+    min-height: 16px;
+    margin-bottom: 8px;
+}
+
+/* Button — same as original */
+.left button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 30px;
+    background: #2aa6a6;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.left button:hover {
+    background: #238c8c;
+}
+
+/* BACK TO LOGIN */
+.forgot {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.forgot a {
+    text-decoration: none;
+    font-size: 14px;
+    color: #2aa6a6;
+}
+
+.forgot a:hover {
+    text-decoration: underline;
+}
+
+/* RIGHT SIDE */
+.right {
+    width: 60%;
+    background: #e6f4f1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.right img {
+    width: 100%;
+    max-width: 580px;
+}
+
+/* ── SUCCESS POPUP ── */
+.popup-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-overlay.show {
+    display: flex;
+}
+
+.popup-box {
+    background: #fff;
+    border-radius: 18px;
+    padding: 44px 40px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    max-width: 360px;
+    width: 90%;
+    animation: popIn 0.3s ease;
+}
+
+@keyframes popIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+}
+
+.popup-icon {
+    font-size: 52px;
+    margin-bottom: 16px;
+}
+
+.popup-box h2 {
+    font-size: 20px;
+    color: #1a1a2e;
+    margin-bottom: 10px;
+}
+
+.popup-box p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 24px;
+}
+
+.popup-btn {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 30px;
+    background: #2aa6a6;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.popup-btn:hover {
+    background: #238c8c;
+}
