@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DesignEase – Landing Page</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+
+  <style>
+    /* ── Templates Section ── */
+    #templates-section {
+      display: none;
+      padding: 60px 80px;
+      background: #f8fbfb;
+      border-top: 1px solid #e0f0ee;
+    }
+
+    #templates-section.show { display: block; }
+
+    #templates-section h2 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1a2e2e;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    #templates-section p.sub {
+      text-align: center;
+      color: #5a8a8a;
+      font-size: 15px;
+      margin-bottom: 36px;
+    }
+
+    /* Filter buttons */
+    .tpl-filters {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .tpl-filter-btn {
+      padding: 8px 20px;
+      border-radius: 30px;
+      border: 1.5px solid #c8e8e5;
+      background: #fff;
+      color: #2aa6a6;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .tpl-filter-btn:hover,
+    .tpl-filter-btn.active {
+      background: #2aa6a6;
+      color: #fff;
+      border-color: #2aa6a6;
+    }
+
+    /* Template grid */
+    .tpl-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .tpl-card {
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1.5px solid #e0f0ee;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .tpl-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(42,166,166,0.15);
+      border-color: #2aa6a6;
+    }
+
+    .tpl-thumb {
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+    }
+
+    .tpl-info {
+      padding: 10px 14px 14px;
+      border-top: 1px solid #eef7f6;
+    }
+
+    .tpl-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1a2e2e;
+      margin-bottom: 4px;
+    }
+
+    .tpl-cat {
+      font-size: 11px;
+      color: #2aa6a6;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Close button */
+    .tpl-close {
+      display: flex;
+      justify-content: center;
+      margin-top: 36px;
+    }
+
+    .tpl-close button {
+      padding: 10px 28px;
+      border-radius: 30px;
+      border: 1.5px solid #c8e8e5;
+      background: #fff;
+      color: #2aa6a6;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .tpl-close button:hover {
+      background: #eef7f6;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="logo">DesignEase</div>
+    <nav>
+      <a href="{{ url_for('index') }}">Home</a>
+      <a href="#" id="templatesNav" onclick="toggleTemplates(event)">Templates</a>
+      <a href="{{ url_for('about') }}">About Us</a>
+      <a href="{{ url_for('contact') }}">Contact Us</a>
+    </nav>
+    <div class="nav-actions">
+      <a href="{{ url_for('login') }}" class="login">Log in</a>
+      <a href="{{ url_for('signup') }}" class="signup">Sign up</a>
+    </div>
+  </header>
+
+  <!-- TEMPLATES SECTION -->
+  <section id="templates-section">
+    <h2>Browse Templates</h2>
+    <p class="sub">Choose from our professionally designed templates</p>
+
+    <!-- Filter buttons -->
+    <div class="tpl-filters">
+      <button class="tpl-filter-btn active" onclick="filterTpl('all', this)">All</button>
+      <button class="tpl-filter-btn" onclick="filterTpl('poster', this)">Poster</button>
+      <button class="tpl-filter-btn" onclick="filterTpl('resume', this)">Resume</button>
+      <button class="tpl-filter-btn" onclick="filterTpl('presentation', this)">Presentation</button>
+      <button class="tpl-filter-btn" onclick="filterTpl('social', this)">Social Media</button>
+      <button class="tpl-filter-btn" onclick="filterTpl('travel', this)">Travel</button>
+    </div>
+
+    <!-- Template cards -->
+    <div class="tpl-grid" id="tplGrid"></div>
+
+    <div class="tpl-close">
+      <button onclick="toggleTemplates()">✕ Close</button>
+    </div>
+  </section>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="hero-left">
+      <h1>
+        You'll love this<br>
+        business landing<br>
+        page template
+      </h1>
+      <p>
+        Here, you can put a short description
+        about your project.
+      </p>
+      <a href="{{ url_for('start') }}" class="cta">
+        Start for Free
+      </a>
+    </div>
+
+    <div class="hero-right">
+      <div class="card card-main">
+        <img src="{{ url_for('static', filename='card1.jpg') }}" alt="Main UI">
+      </div>
+      <div class="card card-side">
+        <img src="{{ url_for('static', filename='card2.jpg') }}" alt="Side UI">
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // All templates list
+    var TEMPLATES = [
+      { id:'poster1',       name:'Hiking Poster',       cat:'poster',       icon:'🏔️', bg:'linear-gradient(135deg,#ead7b5,#f5e9d6)' },
+      { id:'poster2',       name:'Business Workshop',   cat:'poster',       icon:'💼', bg:'linear-gradient(135deg,#1a1a2e,#16213e)' },
+      { id:'poster3',       name:'Creative Poster',     cat:'poster',       icon:'🎨', bg:'linear-gradient(135deg,#f093fb,#f5576c)' },
+      { id:'poster4',       name:'Event Poster',        cat:'poster',       icon:'🎉', bg:'linear-gradient(135deg,#4facfe,#00f2fe)' },
+      { id:'resume1',       name:'Resume Classic',      cat:'resume',       icon:'📄', bg:'linear-gradient(135deg,#1f2937,#374151)' },
+      { id:'resume2',       name:'Resume Modern',       cat:'resume',       icon:'✨', bg:'linear-gradient(135deg,#667eea,#764ba2)' },
+      { id:'resume3',       name:'Resume Creative',     cat:'resume',       icon:'🎭', bg:'linear-gradient(135deg,#f7971e,#ffd200)' },
+      { id:'resume4',       name:'Resume Minimal',      cat:'resume',       icon:'📋', bg:'linear-gradient(135deg,#2d3748,#4a5568)' },
+      { id:'index45',       name:'Resume with Photo',   cat:'resume',       icon:'📸', bg:'linear-gradient(135deg,#e2e8f0,#f7fafc)' },
+      { id:'presentation1', name:'Corporate Dark',      cat:'presentation', icon:'📊', bg:'linear-gradient(135deg,#1a1a2e,#0f3460)' },
+      { id:'social1',       name:'Food Instagram Post', cat:'social',       icon:'🍽️', bg:'linear-gradient(135deg,#f59e0b,#ef4444)' },
+      { id:'social2',       name:'Quote Post Dark',     cat:'social',       icon:'💬', bg:'linear-gradient(135deg,#0f0c29,#302b63)' },
+      { id:'travel1',       name:'Destination Card',    cat:'travel',       icon:'✈️', bg:'linear-gradient(135deg,#0369a1,#0d9488)' },
+      { id:'travel2',       name:'Tour Package',        cat:'travel',       icon:'🌍', bg:'linear-gradient(135deg,#2aa6a6,#1e8a8a)' },
+    ];
+
+    var currentFilter = 'all';
+    var sectionOpen   = false;
+
+    function renderTemplates(filter) {
+      var grid = document.getElementById('tplGrid');
+      var list = filter === 'all' ? TEMPLATES : TEMPLATES.filter(t => t.cat === filter);
+      grid.innerHTML = list.map(t => `
+        <a class="tpl-card" href="{{ url_for('login') }}" title="${t.name}">
+          <div class="tpl-thumb" style="background:${t.bg}">${t.icon}</div>
+          <div class="tpl-info">
+            <div class="tpl-name">${t.name}</div>
+            <div class="tpl-cat">${t.cat}</div>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    function filterTpl(cat, btn) {
+      currentFilter = cat;
+      document.querySelectorAll('.tpl-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTemplates(cat);
+    }
+
+    function toggleTemplates(e) {
+      if (e) e.preventDefault();
+      var sec = document.getElementById('templates-section');
+      sectionOpen = !sectionOpen;
+      if (sectionOpen) {
+        sec.classList.add('show');
+        renderTemplates('all');
+        // Smooth scroll to section
+        setTimeout(() => sec.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+      } else {
+        sec.classList.remove('show');
+      }
+    }
+  </script>
+
+</body>
+</html>
