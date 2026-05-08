@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corporate Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #0a0a0f;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.presentation-slide {
+  width: 1280px;
+  height: 720px;
+  background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 50%, #0f3460 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px;
+}
+
+/* Background decorations */
+.presentation-slide::before {
+  content: '';
+  position: absolute;
+  top: -200px; right: -200px;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.presentation-slide::after {
+  content: '';
+  position: absolute;
+  bottom: -150px; left: -100px;
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Accent bar left */
+.accent-bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 6px;
+  background: linear-gradient(180deg, #6366f1, #10b981);
+}
+
+/* Top bar */
+.top-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #6366f1, #a855f7, #10b981);
+}
+
+/* Logo area */
+.logo-area {
+  position: absolute;
+  top: 32px; right: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.logo-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Slide number */
+.slide-number {
+  position: absolute;
+  bottom: 32px; right: 48px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+/* Content */
+.slide-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(99,102,241,0.2);
+  border: 1px solid rgba(99,102,241,0.4);
+  color: #a5b4fc;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 28px;
+  width: fit-content;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.slide-tag::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #6366f1;
+}
+
+.slide-title {
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #ffffff;
+  margin-bottom: 20px;
+  max-width: 800px;
+}
+
+.slide-title span {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.slide-subtitle {
+  font-size: 18px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.55);
+  max-width: 600px;
+  line-height: 1.7;
+  margin-bottom: 40px;
+}
+
+/* Stats row */
+.stats-row {
+  display: flex;
+  gap: 40px;
+  margin-top: 8px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.stat-value span {
+  color: #10b981;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Right visual */
+.right-visual {
+  position: absolute;
+  right: 80px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feature-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 20px 24px;
+  width: 280px;
+  backdrop-filter: blur(10px);
+  transition: transform 0.2s;
+}
+
+.feature-icon {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.feature-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.feature-desc {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.5;
+}
+
+/* Progress bar */
+.progress-bar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+}
+
+.progress-fill {
+  height: 100%;
+  width: 30%;
+  background: linear-gradient(90deg, #6366f1, #a855f7);
+  border-radius: 0 2px 2px 0;
+}
+</style>
+</head>
+<body>
+
+<div class="presentation-slide">
+
+  <!-- Decorative bars -->
+  <div class="accent-bar"></div>
+  <div class="top-bar"></div>
+
+  <!-- Logo -->
+  <div class="logo-area">
+    <div class="logo-icon">D</div>
+    <div class="logo-text">DesignEase</div>
+  </div>
+
+  <!-- Slide number -->
+  <div class="slide-number">01 / 08</div>
+
+  <!-- Main content -->
+  <div class="slide-tag">Corporate Presentation</div>
+
+  <h1 class="slide-title" contenteditable="true">
+    Build Something<br><span>Extraordinary</span>
+  </h1>
+
+  <p class="slide-subtitle" contenteditable="true">
+    A powerful presentation template designed for modern businesses. Clean, professional, and built to impress.
+  </p>
+
+  <div class="stats-row">
+    <div class="stat-item">
+      <div class="stat-value" contenteditable="true">98<span>%</span></div>
+      <div class="stat-label">Client Satisfaction</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" contenteditable="true">2.4<span>K</span></div>
+      <div class="stat-label">Projects Done</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" contenteditable="true">15<span>+</span></div>
+      <div class="stat-label">Years Experience</div>
+    </div>
+  </div>
+
+  <!-- Right side cards -->
+  <div class="right-visual">
+    <div class="feature-card">
+      <div class="feature-icon">🚀</div>
+      <div class="feature-title" contenteditable="true">Fast Delivery</div>
+      <div class="feature-desc" contenteditable="true">Launch your projects on time, every time.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">💎</div>
+      <div class="feature-title" contenteditable="true">Premium Quality</div>
+      <div class="feature-desc" contenteditable="true">Top-tier design and development standards.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title" contenteditable="true">Secure & Reliable</div>
+      <div class="feature-desc" contenteditable="true">Enterprise-grade security built in.</div>
+    </div>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="progress-bar">
+    <div class="progress-fill"></div>
+  </div>
+
+</div>
+
+</body>
+</html>

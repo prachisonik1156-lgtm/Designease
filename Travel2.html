@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Travel Template 2</title>
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+body{
+  background:#f5f5f5;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  font-family:'Segoe UI',sans-serif;
+  padding:20px;
+}
+
+.poster{
+  width:700px;
+  height:520px;
+  display:flex;
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 24px 64px rgba(0,0,0,0.25);
+}
+
+/* Left image panel */
+.img-panel{
+  width:55%;
+  position:relative;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.img-panel img{
+  width:100%; height:100%;
+  object-fit:cover;
+}
+.img-panel::after{
+  content:"Click to change";
+  position:absolute; inset:0;
+  background:rgba(0,0,0,0.35);
+  color:#fff; font-size:14px;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:0.3s;
+}
+.img-panel:hover::after{ opacity:1; }
+
+/* Small images grid overlay */
+.img-grid{
+  position:absolute;
+  bottom:14px; right:14px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  pointer-events:none;
+}
+.img-grid-item{
+  width:68px; height:52px;
+  border-radius:8px;
+  overflow:hidden;
+  border:2px solid rgba(255,255,255,0.8);
+}
+.img-grid-item img{
+  width:100%; height:100%;
+  object-fit:cover;
+}
+.img-count{
+  width:68px; height:52px;
+  border-radius:8px;
+  background:rgba(0,0,0,0.6);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-size:16px;
+  font-weight:700;
+  border:2px solid rgba(255,255,255,0.8);
+}
+
+/* Right content */
+.content-panel{
+  flex:1;
+  background:#ffffff;
+  padding:36px 32px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.logo-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.agency{
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:2px;
+  color:#2aa6a6;
+  text-transform:uppercase;
+}
+.logo-icon{ font-size:22px; }
+
+.main-content{ flex:1; padding:20px 0; }
+
+.tour-type{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:#2aa6a6;
+  margin-bottom:10px;
+}
+.dest-name{
+  font-size:42px;
+  font-weight:900;
+  color:#1a3333;
+  line-height:1.1;
+  margin-bottom:8px;
+  letter-spacing:-1px;
+}
+.dest-country{
+  font-size:16px;
+  color:#6b7280;
+  margin-bottom:16px;
+}
+.divider{
+  width:48px; height:3px;
+  background:linear-gradient(90deg,#2aa6a6,#0d9488);
+  border-radius:3px;
+  margin-bottom:18px;
+}
+.desc{
+  font-size:13.5px;
+  color:#4b5563;
+  line-height:1.75;
+  margin-bottom:20px;
+}
+
+/* Highlights */
+.highlights{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:20px;
+}
+.highlight{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:13px;
+  color:#374151;
+}
+.highlight::before{
+  content:"✓";
+  width:20px; height:20px;
+  background:#dcfce7;
+  color:#16a34a;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  font-weight:700;
+  flex-shrink:0;
+}
+
+/* Price row */
+.price-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding-top:16px;
+  border-top:1px solid #f0f0f0;
+}
+.price-section{ display:flex; flex-direction:column; gap:2px; }
+.price-from{ font-size:11px; color:#9ca3af; text-transform:uppercase; letter-spacing:1px; }
+.price-val{ font-size:30px; font-weight:800; color:#1a3333; }
+.price-per{ font-size:12px; color:#9ca3af; }
+.book-btn{
+  background:linear-gradient(135deg,#2aa6a6,#0d9488);
+  color:#fff;
+  border:none;
+  border-radius:30px;
+  padding:12px 26px;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  letter-spacing:0.3px;
+  box-shadow:0 4px 16px rgba(42,166,166,0.35);
+  transition:transform 0.2s;
+}
+.book-btn:hover{ transform:translateY(-2px); }
+
+#bgInput2{ display:none; }
+[contenteditable="true"]:hover{ background:#f9fafb; border-radius:4px; outline:none; }
+[contenteditable="true"]:focus{ outline:none; }
+</style>
+</head>
+<body>
+
+<div class="poster">
+
+  <!-- Image Panel -->
+  <div class="img-panel" onclick="document.getElementById('bgInput2').click()">
+    <img id="bgImg2" src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=800&fit=crop&auto=format">
+    <div class="img-grid">
+      <div class="img-grid-item"><img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=200&h=150&fit=crop"></div>
+      <div class="img-grid-item"><img src="https://images.unsplash.com/photo-1488085061387-422e29b40080?w=200&h=150&fit=crop"></div>
+      <div class="img-grid-item"><img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=200&h=150&fit=crop"></div>
+      <div class="img-count">+12</div>
+    </div>
+  </div>
+  <input type="file" id="bgInput2" accept="image/*">
+
+  <!-- Content Panel -->
+  <div class="content-panel">
+    <div class="logo-row">
+      <div class="agency" contenteditable="true">WanderLust Tours</div>
+      <div class="logo-icon">✈️</div>
+    </div>
+
+    <div class="main-content">
+      <div class="tour-type" contenteditable="true">Adventure Package</div>
+      <div class="dest-name" contenteditable="true">Swiss Alps</div>
+      <div class="dest-country" contenteditable="true">📍 Switzerland, Europe</div>
+      <div class="divider"></div>
+      <div class="desc" contenteditable="true">
+        Explore majestic mountain landscapes, crystal-clear lakes, and charming alpine villages on this unforgettable journey.
+      </div>
+      <div class="highlights">
+        <div class="highlight" contenteditable="true">8 Days / 7 Nights Package</div>
+        <div class="highlight" contenteditable="true">Luxury Mountain Resort Stay</div>
+        <div class="highlight" contenteditable="true">Guided Hiking & Ski Tours</div>
+      </div>
+    </div>
+
+    <div class="price-row">
+      <div class="price-section">
+        <div class="price-from">Starting from</div>
+        <div><span class="price-val" contenteditable="true">$1,299</span> <span class="price-per">/person</span></div>
+      </div>
+      <button class="book-btn" contenteditable="true">Book Now →</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.getElementById('bgInput2').addEventListener('change',function(e){
+  const file=e.target.files[0];
+  if(file){ const r=new FileReader(); r.onload=ev=>document.getElementById('bgImg2').src=ev.target.result; r.readAsDataURL(file); }
+});
+</script>
+</body>
+</html>

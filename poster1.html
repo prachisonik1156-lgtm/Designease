@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Hiking Poster</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+background:#f4f4f4;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+font-family:Segoe UI;
+padding:20px;
+}
+
+/* Poster */
+
+.poster{
+width:700px;
+height:700px;
+background:linear-gradient(to bottom,#ead7b5 0%, #f5e9d6 100%);
+border:10px solid #e0c48f;
+position:relative;
+overflow:hidden;
+text-align:center;
+padding:35px 35px 0 35px;
+}
+
+/* soft clouds */
+.poster::before,
+.poster::after{
+content:"";
+position:absolute;
+background:rgba(255,255,255,0.28);
+filter:blur(2px);
+border-radius:50px;
+}
+
+.poster::before{
+width:110px;
+height:18px;
+left:55px;
+top:415px;
+}
+
+.poster::after{
+width:90px;
+height:16px;
+right:70px;
+top:400px;
+}
+
+/* Logo */
+
+.logo{
+font-size:15px;
+letter-spacing:3px;
+color:#9b4b5e;
+margin-top:5px;
+line-height:1.4;
+}
+
+/* Title */
+
+.title{
+font-size:52px;
+font-weight:bold;
+color:#a23a48;
+margin-top:32px;
+}
+
+.subtitle{
+color:#b65a60;
+margin-top:12px;
+letter-spacing:1px;
+font-size:17px;
+}
+
+.date{
+font-size:34px;
+margin-top:14px;
+color:#a23a48;
+font-weight:300;
+}
+
+/* Editable */
+
+[contenteditable="true"]:hover{
+background:rgba(255,255,255,0.35);
+}
+
+/* Image */
+
+.image-box{
+position:absolute;
+left:35px;
+right:35px;
+bottom:135px;
+height:270px;
+overflow:hidden;
+cursor:pointer;
+border-radius:0;
+}
+
+.image-box img{
+width:100%;
+height:100%;
+object-fit:cover;
+display:block;
+}
+
+/* soft fade on image bottom */
+.image-box::after{
+content:"";
+position:absolute;
+left:0;
+right:0;
+bottom:0;
+height:70px;
+background:linear-gradient(to top, #f5e9d6 0%, rgba(245,233,214,0) 100%);
+}
+
+#imgInput{
+display:none;
+}
+
+/* Description */
+
+.desc{
+position:absolute;
+bottom:88px;
+left:55px;
+right:55px;
+font-size:13px;
+line-height:1.5;
+color:#8a6758;
+}
+
+/* Social */
+
+.social{
+position:absolute;
+bottom:40px;
+left:0;
+right:0;
+font-size:20px;
+letter-spacing:8px;
+color:#a23a48;
+}
+
+/* decorative leaves */
+.leaf-left,
+.leaf-right{
+position:absolute;
+bottom:0;
+width:120px;
+height:110px;
+pointer-events:none;
+}
+
+.leaf-left{
+left:0;
+}
+
+.leaf-right{
+right:0;
+}
+
+.leaf-left span,
+.leaf-right span{
+position:absolute;
+display:block;
+border-radius:100px 0 100px 0;
+opacity:0.95;
+}
+
+.leaf-left .l1{
+width:38px;
+height:78px;
+background:#f4a62d;
+left:28px;
+bottom:8px;
+transform:rotate(-28deg);
+}
+
+.leaf-left .l2{
+width:34px;
+height:68px;
+background:#f39aa8;
+left:2px;
+bottom:18px;
+transform:rotate(-45deg);
+}
+
+.leaf-left .l3{
+width:32px;
+height:60px;
+background:#ffd36a;
+left:58px;
+bottom:3px;
+transform:rotate(18deg);
+}
+
+.leaf-left .l4{
+width:30px;
+height:54px;
+background:#4b7f63;
+left:84px;
+bottom:0;
+transform:rotate(40deg);
+}
+
+.leaf-right .r1{
+width:38px;
+height:78px;
+background:#2f7f63;
+right:18px;
+bottom:5px;
+transform:rotate(25deg);
+}
+
+.leaf-right .r2{
+width:34px;
+height:68px;
+background:#174f48;
+right:52px;
+bottom:10px;
+transform:rotate(5deg);
+}
+
+.leaf-right .r3{
+width:30px;
+height:56px;
+background:#8bc34a;
+right:0;
+bottom:0;
+transform:rotate(-8deg);
+}
+
+.leaf-right .r4{
+width:26px;
+height:48px;
+background:#f2c94c;
+right:30px;
+bottom:0;
+transform:rotate(-30deg);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="poster">
+
+<div class="logo" contenteditable="true">
+MOUNTAIN<br>TOUR
+</div>
+
+<div class="title" contenteditable="true">
+HIKING
+</div>
+
+<div class="subtitle" contenteditable="true">
+SUPER OFFER GROUPS
+</div>
+
+<div class="date" contenteditable="true">
+15 APRIL
+</div>
+
+<!-- IMAGE -->
+<div class="image-box" onclick="document.getElementById('imgInput').click()">
+<img id="posterImage" src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80">
+</div>
+
+<input type="file" id="imgInput">
+
+<div class="desc" contenteditable="true">
+This is Photoshop version of Lorem Ipsum. Proin gravida nibh vel velit auctor aliquet.
+</div>
+
+<div class="social" contenteditable="true">
+●●●●
+</div>
+
+<!-- decorative leaves -->
+<div class="leaf-left">
+  <span class="l1"></span>
+  <span class="l2"></span>
+  <span class="l3"></span>
+  <span class="l4"></span>
+</div>
+
+<div class="leaf-right">
+  <span class="r1"></span>
+  <span class="r2"></span>
+  <span class="r3"></span>
+  <span class="r4"></span>
+</div>
+
+</div>
+
+<script>
+
+const imgInput=document.getElementById("imgInput");
+const posterImage=document.getElementById("posterImage");
+
+imgInput.addEventListener("change",function(e){
+
+const file=e.target.files[0];
+
+if(file){
+const reader=new FileReader();
+reader.onload=function(event){
+posterImage.src=event.target.result;
+};
+reader.readAsDataURL(file);
+}
+
+});
+
+</script>
+
+</body>
+</html>

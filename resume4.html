@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Luxury Resume</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#111827;
+    font-family:Georgia, serif;
+    padding:30px 0;
+}
+
+.resume{
+    width:950px;
+    min-height:1300px;
+    margin:auto;
+    display:flex;
+    background:#fffaf5;
+    box-shadow:0 10px 35px rgba(0,0,0,0.3);
+}
+
+.left{
+    width:36%;
+    background:#1f2937;
+    color:white;
+    padding:50px 35px;
+    text-align:center;
+}
+
+.right{
+    width:64%;
+    padding:55px 55px;
+    background:#fffaf5;
+}
+
+.profile-img{
+    width:190px;
+    height:190px;
+    border-radius:50%;
+    overflow:hidden;
+    margin:auto;
+    border:4px solid #d1a954;
+    cursor:pointer;
+    position:relative;
+}
+
+.profile-img img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.profile-img::after{
+    content:"Click to upload";
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    background:rgba(0,0,0,0.5);
+    color:white;
+    text-align:center;
+    font-size:13px;
+    padding:8px;
+    opacity:0;
+    transition:0.3s;
+}
+
+.profile-img:hover::after{
+    opacity:1;
+}
+
+#photoInput{
+    display:none;
+}
+
+.name{
+    margin-top:25px;
+    font-size:34px;
+    color:#f9fafb;
+    letter-spacing:2px;
+}
+
+.role{
+    margin-top:8px;
+    color:#d1a954;
+    letter-spacing:3px;
+    font-size:14px;
+}
+
+.left-section{
+    margin-top:38px;
+    text-align:left;
+}
+
+.left-section h3{
+    color:#d1a954;
+    font-size:17px;
+    letter-spacing:2px;
+    margin-bottom:12px;
+    border-bottom:1px solid rgba(209,169,84,0.4);
+    padding-bottom:8px;
+}
+
+.left-section p{
+    font-size:14px;
+    color:#e5e7eb;
+    line-height:1.8;
+    margin-bottom:10px;
+}
+
+.right-title{
+    font-size:22px;
+    color:#7c5a12;
+    border-bottom:2px solid #d1a954;
+    display:inline-block;
+    padding-bottom:6px;
+    margin-bottom:16px;
+}
+
+.block{
+    margin-bottom:40px;
+}
+
+.entry{
+    margin-bottom:28px;
+}
+
+.entry h4{
+    font-size:19px;
+    color:#2d2d2d;
+    margin-bottom:4px;
+}
+
+.meta{
+    font-size:13px;
+    color:#8b7355;
+    margin-bottom:10px;
+}
+
+.desc{
+    font-size:15px;
+    color:#5b4a38;
+    line-height:1.8;
+}
+
+[contenteditable="true"]{
+    outline:none;
+}
+
+[contenteditable="true"]:hover{
+    background:#fff1d6;
+}
+
+@media(max-width:980px){
+    .resume{
+        width:95%;
+        flex-direction:column;
+    }
+    .left,.right{
+        width:100%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="resume">
+
+    <div class="left">
+
+        <div class="profile-img" onclick="document.getElementById('photoInput').click()">
+            <img id="profilePreview" src="https://randomuser.me/api/portraits/women/90.jpg" alt="Profile">
+        </div>
+        <input type="file" id="photoInput" accept="image/*">
+
+        <div class="name" contenteditable="true">Sophia Williams</div>
+        <div class="role" contenteditable="true">PRODUCT MANAGER</div>
+
+        <div class="left-section">
+            <h3>CONTACT</h3>
+            <p contenteditable="true"><i class="fa fa-phone"></i> +91 8888888888</p>
+            <p contenteditable="true"><i class="fa fa-envelope"></i> sophia@email.com</p>
+            <p contenteditable="true"><i class="fa fa-location-dot"></i> Bangalore, India</p>
+            <p contenteditable="true"><i class="fa fa-globe"></i> www.sophia.com</p>
+        </div>
+
+        <div class="left-section">
+            <h3>CORE SKILLS</h3>
+            <p contenteditable="true">Product Strategy</p>
+            <p contenteditable="true">Leadership</p>
+            <p contenteditable="true">Agile Methodology</p>
+            <p contenteditable="true">Market Research</p>
+        </div>
+
+        <div class="left-section">
+            <h3>LANGUAGES</h3>
+            <p contenteditable="true">English</p>
+            <p contenteditable="true">Hindi</p>
+        </div>
+
+    </div>
+
+    <div class="right">
+
+        <div class="block">
+            <div class="right-title">PROFILE</div>
+            <div class="desc" contenteditable="true">
+                Strategic product manager with expertise in roadmap planning, user-focused development, and delivering scalable product solutions for competitive markets.
+            </div>
+        </div>
+
+        <div class="block">
+            <div class="right-title">WORK EXPERIENCE</div>
+
+            <div class="entry">
+                <h4 contenteditable="true">Senior Product Manager</h4>
+                <div class="meta" contenteditable="true">Tech Corp | 2022 - Present</div>
+                <div class="desc" contenteditable="true">
+                    Leading cross-functional teams to define product vision, improve customer experience, and deliver high-impact digital products.
+                </div>
+            </div>
+
+            <div class="entry">
+                <h4 contenteditable="true">Associate Product Manager</h4>
+                <div class="meta" contenteditable="true">Startup Inc | 2020 - 2022</div>
+                <div class="desc" contenteditable="true">
+                    Worked on feature prioritization, user research, roadmap execution, and stakeholder communication.
+                </div>
+            </div>
+
+            <div class="entry">
+                <h4 contenteditable="true">Business Executive</h4>
+                <div class="meta" contenteditable="true">Enterprise Group | 2018 - 2020</div>
+                <div class="desc" contenteditable="true">
+                    Supported strategic planning, data reporting, and business growth initiatives.
+                </div>
+            </div>
+        </div>
+
+        <div class="block">
+            <div class="right-title">EDUCATION</div>
+
+            <div class="entry">
+                <h4 contenteditable="true">MBA in Business Management</h4>
+                <div class="meta" contenteditable="true">Business School | 2016 - 2018</div>
+                <div class="desc" contenteditable="true">
+                    Focused on management, leadership, marketing, and strategic decision making.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+const photoInput = document.getElementById("photoInput");
+const profilePreview = document.getElementById("profilePreview");
+
+photoInput.addEventListener("change", function(e){
+    const file = e.target.files[0];
+    if(file){
+        const reader = new FileReader();
+        reader.onload = function(event){
+            profilePreview.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DesignEase – Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='editor.css') }}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div id="toolbar">
+  <a href="/dashboard" class="tb-back-btn" title="Dashboard pe wapas jayein">
+    <i class="fas fa-arrow-left"></i>
+  </a>
+  
+  <div class="toolbar-sep"></div>
+  <input id="design-name-field" value="Untitled Design"
+    style="background:transparent;border:1px solid transparent;color:var(--text);
+    font-size:13px;border-radius:8px;padding:5px 10px;outline:none;font-family:inherit;
+    width:180px;transition:border-color .15s;cursor:text;"
+    onfocus="this.style.borderColor='var(--border)'"
+    onblur="this.style.borderColor='transparent'; scheduleSave();">
+  <div class="toolbar-sep"></div>
+  <select class="canvas-size-select" id="canvas-size-sel" onchange="applyCanvasSize(this.value)">
+    <option value="1080x1080">Instagram Post (1080×1080)</option>
+    <option value="1920x1080">HD Wallpaper (1920×1080)</option>
+    <option value="800x600">Presentation (800×600)</option>
+    <option value="595x842">A4 (595×842)</option>
+    <option value="1200x628">Facebook Cover (1200×628)</option>
+     <option value="595x595">Business Card (595×595)</option>
+    <option value="595x420">A5 Landscape (595×420)</option>
+    <option value="842x1191">A3 Portrait (842×1191)</option>
+    <option value="custom">Custom...</option>
+  </select>
+  <div class="toolbar-sep"></div>
+  <button class="tb-btn" onclick="undo()"><i class="fas fa-undo"></i> Undo</button>
+  <button class="tb-btn" onclick="redo()"><i class="fas fa-redo"></i> Redo</button>
+  <div class="toolbar-sep"></div>
+  <button class="tb-btn" onclick="deleteSelected()"><i class="fas fa-trash"></i> Delete</button>
+  <button class="tb-btn" onclick="duplicateSelected()"><i class="fas fa-copy"></i> Duplicate</button>
+  <div class="tb-spacer"></div>
+  <div class="zoom-control">
+    <i class="fas fa-search-minus" style="font-size:11px"></i>
+    <input type="range" id="zoom-range" min="10" max="200" value="70" oninput="setZoom(this.value)">
+    <i class="fas fa-search-plus" style="font-size:11px"></i>
+    <span id="zoom-val" style="min-width:36px">70%</span>
+  </div>
+  <div class="toolbar-sep"></div>
+  <button class="tb-btn" onclick="saveDesign()"><i class="fas fa-save"></i> Save</button>
+  <button class="tb-btn primary" onclick="exportDesign()"><i class="fas fa-download"></i> Export PNG</button>
+</div>
+
+<div id="main">
+
+  <!-- LEFT PANEL -->
+  <div id="left-panel">
+    <!-- SEARCH BOX -->
+<div id="search-box-wrap" style="padding:12px 12px 0;">
+  <div style="position:relative;">
+    <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#7a7a9a;font-size:12px;pointer-events:none;"></i>
+    <input id="el-search" type="text" placeholder="Search... (rect, text, heart...)"
+      autocomplete="off"
+      style="width:100%;background:#ffffff;border:1px solid #2e2e42;color:#e8e8f0;
+      border-radius:10px;padding:9px 12px 9px 32px;font-size:12px;outline:none;font-family:inherit;"
+      onfocus="this.style.borderColor='#7c6dfa'; showSearchResults(this.value)"
+      onblur="setTimeout(()=>{hideSearchResults()},200)"
+      oninput="showSearchResults(this.value)">
+    <span id="search-clear" onclick="clearSearch()"
+      style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);
+      color:#7a7a9a;cursor:pointer;font-size:14px;">✕</span>
+  </div>
+  <div id="search-results-panel"
+    style="display:none;margin-top:6px;background:#22222f;border:1px solid #2e2e42;
+    border-radius:10px;overflow-y:auto;max-height:320px;"></div>
+</div>
+
+    <!-- TABS WITH SCROLL ARROWS -->
+    <div style="display:flex;align-items:stretch;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <button onclick="scrollTabs(-1)" id="tab-arrow-left"
+        style="flex-shrink:0;width:24px;background:var(--surface);border:none;border-right:1px solid var(--border);
+        cursor:pointer;color:var(--text-muted);font-size:16px;display:flex;align-items:center;
+        justify-content:center;padding:0;opacity:0.4;transition:opacity .15s;"
+        onmouseover="this.style.opacity='1'" onmouseout="updateTabArrows()">&#8249;</button>
+
+      <div class="panel-tabs" id="panel-tabs-row"
+        style="flex:1;overflow-x:auto;scrollbar-width:none;border-bottom:none;display:flex;">
+        <div class="panel-tab active" onclick="switchTab('elements',this)">Elements</div>
+        <div class="panel-tab" onclick="switchTab('text',this)">Text</div>
+        <div class="panel-tab" onclick="switchTab('graphics',this)">Graphics</div>
+        <div class="panel-tab" onclick="switchTab('media',this)">Media</div>
+        <div class="panel-tab" onclick="switchTab('templates',this)">Templates</div>
+        <div class="panel-tab" onclick="switchTab('threed',this)">3D</div>
+        <div class="panel-tab" onclick="switchTab('bg',this)">BG</div>
+      </div>
+
+      <button onclick="scrollTabs(1)" id="tab-arrow-right"
+        style="flex-shrink:0;width:24px;background:var(--surface);border:none;border-left:1px solid var(--border);
+        cursor:pointer;color:var(--text-muted);font-size:16px;display:flex;align-items:center;
+        justify-content:center;padding:0;opacity:1;transition:opacity .15s;"
+        onmouseover="this.style.opacity='1'" onmouseout="updateTabArrows()">&#8250;</button>
+    </div>
+    <div class="panel-content">
+
+      <!-- ELEMENTS TAB -->
+      <div class="tab-section active" id="tab-elements">
+        <div class="section-title">Add Element</div>
+        <div class="elements-grid">
+          <div class="elem-btn" onclick="addRect()"><i class="fas fa-square"></i>Rectangle</div>
+          <div class="elem-btn" onclick="addCircle()"><i class="fas fa-circle"></i>Circle</div>
+          <div class="elem-btn" onclick="addTriangle()"><i class="fas fa-play"></i>Triangle</div>
+          <div class="elem-btn" onclick="addStar()"><i class="fas fa-star"></i>Star</div>
+          <div class="elem-btn" onclick="addLine()"><i class="fas fa-minus"></i>Line</div>
+          <div class="elem-btn" onclick="addArrow()"><i class="fas fa-arrow-right"></i>Arrow</div>
+          <div class="elem-btn wide" onclick="addIconEl()"><i class="fas fa-icons"></i>Icon / Emoji</div>
+        </div>
+        <div class="section-title">Shapes</div>
+        <div class="shapes-grid">
+          <div class="shape-btn" title="Heart" onclick="addShape('heart')">♥</div>
+          <div class="shape-btn" title="Diamond" onclick="addShape('diamond')">◆</div>
+          <div class="shape-btn" title="Hexagon" onclick="addShape('hex')">⬡</div>
+          <div class="shape-btn" title="Cross" onclick="addShape('cross')">✚</div>
+          <div class="shape-btn" title="Check" onclick="addShape('check')">✔</div>
+          <div class="shape-btn" title="Lightning" onclick="addShape('lightning')">⚡</div>
+          <div class="shape-btn" title="Flower" onclick="addShape('flower')">✿</div>
+          <div class="shape-btn" title="Moon" onclick="addShape('moon')">☽</div>
+        </div>
+        <div class="section-title">Quick Colors</div>
+        <div class="color-palette" id="palette"></div>
+      </div>
+
+      <!-- TEXT TAB -->
+      <div class="tab-section" id="tab-text">
+        <div class="section-title">Add Text</div>
+        <div class="text-preset" onclick="addText('Heading', 42, '#1a1a2e', 'bold')">
+          <div style="font-size:24px;font-weight:800;font-family:'Syne',sans-serif">Add a Heading</div>
+        </div>
+        <div class="text-preset" onclick="addText('Subheading', 26, '#333', '600')">
+          <div style="font-size:16px;font-weight:600">Add a Subheading</div>
+        </div>
+        <div class="text-preset" onclick="addText('Body text here', 16, '#555', '400')">
+          <div style="font-size:13px">Add body text</div>
+        </div>
+        <div class="text-preset" onclick="addText('LABEL', 12, '#888', '600')">
+          <div style="font-size:11px;letter-spacing:2px;color:#888;font-weight:600">ADD LABEL</div>
+        </div>
+        <div class="section-title" style="margin-top:16px">Fonts</div>
+        <div style="font-size:12px;color:var(--text-muted)">Select a text element, then change font in the right panel.</div>
+      </div>
+
+      <!-- MEDIA TAB -->
+      <div class="tab-section" id="tab-media">
+        <div class="section-title">Upload Image</div>
+        <div id="upload-area" onclick="document.getElementById('file-input').click()">
+          <i class="fas fa-cloud-upload-alt"></i>
+          Click or drag to upload
+          <div style="font-size:11px;margin-top:6px;color:var(--text-muted)">PNG, JPG, GIF, WebP, SVG</div>
+        </div>
+        <input type="file" id="file-input" accept="image/*" onchange="uploadImage(this)">
+        <div class="section-title">Uploaded Images</div>
+        <div class="uploaded-imgs" id="uploaded-imgs"></div>
+      </div>
+
+
+      <!-- TEMPLATES TAB -->
+<div class="tab-section" id="tab-templates">
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+    <!-- NAYA: -->
+<button class="tpl-cat-btn active" onclick="filterTemplates('all',this)">All</button>
+<button class="tpl-cat-btn" onclick="filterTemplates('poster',this)">Poster</button>
+<button class="tpl-cat-btn" onclick="filterTemplates('resume',this)">Resume</button>
+  </div>
+  <div id="templates-grid"></div>
+</div>
+
+      <!-- BG TAB -->
+      <!-- GRAPHICS TAB -->
+      <div class="tab-section" id="tab-graphics">
+
+        <!-- Sub tabs -->
+        <div style="display:flex;gap:4px;margin-bottom:10px;background:var(--surface2);border-radius:8px;padding:4px;">
+          <div class="g-subtab active" onclick="switchGraphicsTab('vectors',this)" style="flex:1;text-align:center;padding:6px 4px;border-radius:6px;cursor:pointer;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted);transition:all .15s;">Vectors</div>
+          <div class="g-subtab" onclick="switchGraphicsTab('icons',this)" style="flex:1;text-align:center;padding:6px 4px;border-radius:6px;cursor:pointer;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted);transition:all .15s;">Icons</div>
+          <div class="g-subtab" onclick="switchGraphicsTab('photos',this)" style="flex:1;text-align:center;padding:6px 4px;border-radius:6px;cursor:pointer;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted);transition:all .15s;">Photos</div>
+        </div>
+
+        <!-- Search -->
+        <div style="position:relative;margin-bottom:10px;">
+          <i class="fas fa-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:11px;pointer-events:none;"></i>
+          <input id="g-search" type="text" placeholder="Search..."
+            style="width:100%;padding:8px 10px 8px 28px;border:1px solid var(--border);border-radius:8px;
+            background:var(--surface2);color:var(--text);font-size:12px;outline:none;font-family:inherit;"
+            onfocus="this.style.borderColor='var(--accent)'"
+            onblur="this.style.borderColor='var(--border)'"
+            oninput="searchGraphics(this.value)">
+        </div>
+
+        <!-- Vectors section -->
+        <div class="g-section active" id="gsec-vectors">
+          <div class="section-title">Vector Shapes</div>
+          <div id="vectors-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;"></div>
+        </div>
+
+        <!-- Icons section -->
+        <div class="g-section" id="gsec-icons" style="display:none;">
+          <div class="section-title">Icons</div>
+          <div id="icons-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;"></div>
+          <div id="icons-load-more" style="text-align:center;margin-top:8px;">
+            <button onclick="loadMoreIcons()" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text-muted);cursor:pointer;font-size:12px;">Load More</button>
+          </div>
+        </div>
+
+        <!-- Photos section -->
+        <div class="g-section" id="gsec-photos" style="display:none;">
+          <div class="section-title">Free Photos</div>
+          <div id="photos-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;"></div>
+          <button onclick="loadMorePhotos()" style="width:100%;margin-top:8px;padding:7px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text-muted);cursor:pointer;font-size:12px;">Load More</button>
+        </div>
+
+      </div>
+
+      <div class="tab-section" id="tab-threed">
+        <div class="section-title">3D Shapes</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;">
+        <div class="elem-btn" onclick="add3D('cube')"><i class="fas fa-cube"></i>Cube</div>
+        <div class="elem-btn" onclick="add3D('sphere')"><i class="fas fa-circle"></i>Sphere</div>
+        <div class="elem-btn" onclick="add3D('cylinder')"><i class="fas fa-database"></i>Cylinder</div>
+        <div class="elem-btn" onclick="add3D('cone')"><i class="fas fa-play"></i>Cone</div>
+        <div class="elem-btn" onclick="add3D('torus')"><i class="fas fa-ring"></i>Torus</div>
+        <div class="elem-btn" onclick="add3D('diamond')"><i class="fas fa-gem"></i>Diamond</div>
+      </div>
+  <div class="section-title">Color</div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+    <div onclick="set3DColor('#7c6dfa')" style="width:26px;height:26px;border-radius:5px;background:#7c6dfa;cursor:pointer;"></div>
+    <div onclick="set3DColor('#fa6d8d')" style="width:26px;height:26px;border-radius:5px;background:#fa6d8d;cursor:pointer;"></div>
+    <div onclick="set3DColor('#6dfacc')" style="width:26px;height:26px;border-radius:5px;background:#6dfacc;cursor:pointer;"></div>
+    <div onclick="set3DColor('#ffd93d')" style="width:26px;height:26px;border-radius:5px;background:#ffd93d;cursor:pointer;"></div>
+    <div onclick="set3DColor('#4facfe')" style="width:26px;height:26px;border-radius:5px;background:#4facfe;cursor:pointer;"></div>
+    <div onclick="set3DColor('#ff6b35')" style="width:26px;height:26px;border-radius:5px;background:#ff6b35;cursor:pointer;"></div>
+    <div onclick="set3DColor('#43e97b')" style="width:26px;height:26px;border-radius:5px;background:#43e97b;cursor:pointer;"></div>
+    <div onclick="set3DColor('#f093fb')" style="width:26px;height:26px;border-radius:5px;background:#f093fb;cursor:pointer;"></div>
+    <div onclick="set3DColor('#ffffff')" style="width:26px;height:26px;border-radius:5px;background:#fff;cursor:pointer;border:1px solid #ccc;"></div>
+    <div onclick="set3DColor('#1a1a2e')" style="width:26px;height:26px;border-radius:5px;background:#1a1a2e;cursor:pointer;"></div>
+  </div>
+  <div class="section-title">Auto Rotate</div>
+  <div class="toggle-wrap" style="margin-bottom:12px;">
+    <label class="toggle">
+      <input type="checkbox" id="autoRotateToggle" checked onchange="toggleAutoRotate(this.checked)">
+      <span class="toggle-slider"></span>
+    </label>
+    <span style="font-size:13px;margin-left:8px;">Enable</span>
+  </div>
+  <div class="section-title">Speed</div>
+    <input type="range" min="1" max="10" value="3" id="rotateSpeed" 
+      style="width:100%;accent-color:var(--accent);"
+      oninput="update3DSpeed(this.value)">
+  </div>
+
+      <div class="tab-section" id="tab-bg">
+        <div class="section-title">Background Color</div>
+        <div class="color-input-wrap" style="margin-bottom:12px">
+          <input type="color" id="bg-color-pick" value="#ffffff" style="width:40px;height:40px;border:none;border-radius:8px;cursor:pointer;background:none" onchange="setCanvasBg(this.value)">
+          <input class="prop-input" id="bg-hex" value="#ffffff" oninput="setCanvasBg(this.value)" placeholder="#hex">
+        </div>
+        <div class="section-title">Gradient Backgrounds</div>
+        <div id="gradient-list"></div>
+        <div class="section-title" style="margin-top:12px">Solid Colors</div>
+        <div class="color-palette" id="bg-palette"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div id="canvas-area">
+    <div id="canvas-bg"></div>
+    <div id="canvas-wrapper">
+      <div id="canvas"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div id="right-panel">
+    <div class="props-header">Properties</div>
+    <div class="props-body" id="props-body">
+      <div style="color:var(--text-muted);font-size:13px;text-align:center;margin-top:40px;line-height:1.8">
+        <i class="fas fa-mouse-pointer" style="font-size:24px;display:block;margin-bottom:12px;opacity:.4"></i>
+        Select an element<br>to edit its properties
+      </div>
+    </div>
+    <!-- LAYERS -->
+    <div style="border-top:1px solid var(--border);padding:10px 12px">
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Layers</div>
+      <div id="layers-list" style="max-height:160px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- CONTEXT MENU -->
+<div id="ctx-menu">
+  <div class="ctx-item" onclick="duplicateSelected()"><i class="fas fa-copy"></i>Duplicate</div>
+  <div class="ctx-item" onclick="bringForward()"><i class="fas fa-level-up-alt"></i>Bring Forward</div>
+  <div class="ctx-item" onclick="sendBackward()"><i class="fas fa-level-down-alt"></i>Send Backward</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="alignLeft()"><i class="fas fa-align-left"></i>Align Left</div>
+  <div class="ctx-item" onclick="alignCenter()"><i class="fas fa-align-center"></i>Align Center</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="deleteSelected()" style="color:var(--accent2)"><i class="fas fa-trash"></i>Delete</div>
+</div>
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let canvas = document.getElementById('canvas');
+let selected = null;
+let zoomLevel = 0.7;
+let history = []; let histIdx = -1;
+let elCounter = 0;
+
+// ─── CANVAS SIZE ─────────────────────────────────────────────────────────────
+let cw = 1080, ch = 1080;
+function applyCanvasSize(val) {
+  if (val === 'custom') {
+    let w = prompt('Width (px):', cw), h = prompt('Height (px):', ch);
+    if (w && h) { cw = +w; ch = +h; }
+  } else {
+    [cw, ch] = val.split('x').map(Number);
+  }
+  canvas.style.width = cw + 'px';
+  canvas.style.height = ch + 'px';
+  fitZoom();
+}
+function fitZoom() {
+  let area = document.getElementById('canvas-area');
+  let pw = area.clientWidth - 80, ph = area.clientHeight - 80;
+  let z = Math.min(pw/cw, ph/ch, 1);
+  setZoom(Math.round(z*100));
+}
+function setZoom(v) {
+  zoomLevel = v/100;
+  document.getElementById('canvas-wrapper').style.transform = `scale(${zoomLevel})`;
+  document.getElementById('zoom-range').value = v;
+  document.getElementById('zoom-val').textContent = v+'%';
+}
+applyCanvasSize('1080x1080');
+
+// ─── PALETTE ─────────────────────────────────────────────────────────────────
+const COLORS = ['#ff6b6b','#ffa550','#ffd93d','#6bcb77','#4d96ff','#c77dff','#f72585','#4cc9f0','#1a1a2e','#fff','#333','#e8e8e8'];
+const GRADIENTS = [
+  {label:'Sunset','bg':'linear-gradient(135deg,#f093fb,#f5576c)'},
+  {label:'Ocean','bg':'linear-gradient(135deg,#4facfe,#00f2fe)'},
+  {label:'Forest','bg':'linear-gradient(135deg,#43e97b,#38f9d7)'},
+  {label:'Night','bg':'linear-gradient(135deg,#0f0c29,#302b63,#24243e)'},
+  {label:'Candy','bg':'linear-gradient(135deg,#fddb92,#d1fdff)'},
+  {label:'Purple','bg':'linear-gradient(135deg,#667eea,#764ba2)'},
+];
+let pal = document.getElementById('palette');
+COLORS.forEach(c => {
+  let d = document.createElement('div');
+  d.className='palette-color'; d.style.background=c;
+  d.onclick = () => { if(selected) setElColor(c); };
+  pal.appendChild(d);
+});
+let bpal = document.getElementById('bg-palette');
+COLORS.forEach(c => {
+  let d = document.createElement('div'); d.className='palette-color'; d.style.background=c;
+  d.onclick = () => setCanvasBg(c);
+  bpal.appendChild(d);
+});
+let gl = document.getElementById('gradient-list');
+GRADIENTS.forEach(g => {
+  let d = document.createElement('div');
+  d.style.cssText = `height:42px;border-radius:10px;cursor:pointer;background:${g.bg};margin-bottom:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5);transition:transform .15s`;
+  d.textContent = g.label;
+  d.onmouseover=()=>d.style.transform='scale(1.02)';
+  d.onmouseout=()=>d.style.transform='';
+  d.onclick=()=>{ canvas.style.background = g.bg; canvas.style.backgroundColor=''; };
+  gl.appendChild(d);
+});
+
+function setCanvasBg(val) {
+  if (!val) return;
+  canvas.style.background = val;
+  document.getElementById('bg-color-pick').value = val.startsWith('#')?val:'#ffffff';
+  document.getElementById('bg-hex').value = val;
+}
+
+// ─── TAB SWITCHING ────────────────────────────────────────────────────────────
+// ── Tab scroll arrows ─────────────────────────────────────────────────────
+function scrollTabs(dir) {
+  let tabs = document.getElementById('panel-tabs-row');
+  if (tabs) tabs.scrollBy({ left: dir * 80, behavior: 'smooth' });
+  setTimeout(updateTabArrows, 300);
+}
+
+function updateTabArrows() {
+  let tabs = document.getElementById('panel-tabs-row');
+  let left = document.getElementById('tab-arrow-left');
+  let right= document.getElementById('tab-arrow-right');
+  if (!tabs || !left || !right) return;
+  left.style.opacity  = tabs.scrollLeft > 2 ? '1' : '0.3';
+  right.style.opacity = tabs.scrollLeft < (tabs.scrollWidth - tabs.clientWidth - 2) ? '1' : '0.3';
+}
+
+// Hide scrollbar on tabs
+document.addEventListener('DOMContentLoaded', () => {
+  let tabs = document.getElementById('panel-tabs-row');
+  if (tabs) {
+    tabs.addEventListener('scroll', updateTabArrows);
+    updateTabArrows();
+    // Hide webkit scrollbar
+    let style = document.createElement('style');
+    style.textContent = '#panel-tabs-row::-webkit-scrollbar { display:none; }';
+    document.head.appendChild(style);
+  }
+});
+
+function switchTab(name, el) {
+  document.querySelectorAll('.panel-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-section').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  // Auto-init graphics tabs
+  if (name === 'graphics') {
+    if (!document.getElementById('vectors-grid').children.length) renderVectors(SVG_VECTORS);
+    // Set first subtab active style
+    let firstTab = document.querySelector('.g-subtab');
+    if (firstTab && !document.querySelector('.g-subtab[style*="var(--accent)"]')) {
+      firstTab.style.background = 'var(--accent)';
+      firstTab.style.color = '#fff';
+    }
+  }
+}
+
+// ─── ELEMENT FACTORY ─────────────────────────────────────────────────────────
+function makeEl(type, style={}, content='') {
+  let el = document.createElement('div');
+  el.className = 'canvas-el';
+  el.dataset.type = type;
+  el.dataset.id = ++elCounter;
+ el.style.position = 'absolute';
+el.style.left = (cw/2-75)+'px';
+el.style.top  = (ch/2-50)+'px';
+el.style.width = '150px';
+el.style.minHeight = '40px';
+el.style.zIndex = elCounter;
+if (typeof style === 'string') {
+  style.split(';').forEach(rule => {
+    let [prop, val] = rule.split(':');
+    if (prop && val) {
+      let camel = prop.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      el.style[camel] = val.trim();
+    }
+  });
+} else if (typeof style === 'object') {
+  Object.assign(el.style, style);
+}
+  if (content) el.innerHTML = content;
+  // handles
+  ['nw','n','ne','e','se','s','sw','w'].forEach(pos => {
+    let h = document.createElement('div'); h.className=`resize-handle ${pos}`; el.appendChild(h);
+  });
+  let rot = document.createElement('div'); rot.className='rotate-handle'; rot.innerHTML='↻'; el.appendChild(rot);
+  let del = document.createElement('div'); del.className='delete-handle'; del.innerHTML='✕'; el.appendChild(del);
+  del.onclick = e => { e.stopPropagation(); el.remove(); selected=null; updateProps(); updateLayers(); pushHistory(); };
+  canvas.appendChild(el);
+  attachDrag(el);
+  attachResize(el);
+  attachRotate(el);
+  selectEl(el);
+  pushHistory();
+  updateLayers();
+  return el;
+}
+
+// ─── ADD ELEMENTS ─────────────────────────────────────────────────────────────
+function addRect() { makeEl('rect','background:#7c6dfa;borderRadius:4px'); }
+function addCircle() { makeEl('circle','background:#fa6d8d;borderRadius:50%;width:130px;height:130px;minHeight:130px'); }
+function addTriangle() { makeEl('svg',{},`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><polygon points="50,5 95,95 5,95" fill="#6dfacc"/></svg>`); }
+function addStar() { makeEl('svg',{},`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" fill="#ffd93d"/></svg>`); }
+function addLine() {
+  let el = makeEl('line','borderTop:3px solid #333;height:3px;minHeight:3px;width:200px');
+  el.style.background = 'transparent';
+}
+function addArrow() { makeEl('svg',{},`<svg viewBox="0 0 200 40" style="width:100%;height:100%"><line x1="10" y1="20" x2="170" y2="20" stroke="#333" stroke-width="3"/><polygon points="170,8 190,20 170,32" fill="#333"/></svg>`); }
+function addShape(type) {
+  const map = {heart:'♥',diamond:'◆',hex:'⬡',cross:'✚',check:'✔',lightning:'⚡',flower:'✿',moon:'☽'};
+  makeEl('shape','fontSize:80px;width:100px;minHeight:100px;textAlign:center;lineHeight:1;color:#7c6dfa', map[type]);
+}
+function addIconEl() {
+  let ic = prompt('Enter emoji or symbol:', '🎨');
+  if (ic) makeEl('icon','fontSize:64px;width:80px;minHeight:80px;textAlign:center;lineHeight:1', ic);
+}
+function addText(txt='New Text', size=24, color='#1a1a2e', weight='400') {
+  let el = makeEl('text', `fontSize:${size}px;color:${color};fontWeight:${weight};fontFamily:Syne,sans-serif;padding:8px;minWidth:120px;width:auto;minHeight:auto;whiteSpace:nowrap`, txt);
+  el.classList.add('text-el');
+  el.ondblclick = () => { el.setAttribute('contenteditable','true'); el.focus(); };
+  el.onblur = () => { el.setAttribute('contenteditable','false'); pushHistory(); };
+}
+function addImage(url) {
+  let img = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;pointer-events:none;border-radius:4px">`;
+  makeEl('image','width:200px;height:200px;minHeight:200px', img);
+}
+
+// ─── DRAG ─────────────────────────────────────────────────────────────────────
+function attachDrag(el) {
+  el.addEventListener('mousedown', e => {
+    if (e.target.classList.contains('resize-handle') || e.target.classList.contains('rotate-handle') || e.target.classList.contains('delete-handle')) return;
+    if (el.getAttribute('contenteditable') === 'true') return;
+    e.stopPropagation(); e.preventDefault();
+    selectEl(el);
+    let startX = e.clientX, startY = e.clientY;
+    let startL = parseInt(el.style.left)||0, startT = parseInt(el.style.top)||0;
+    function onMove(e2) {
+      let dx = (e2.clientX-startX)/zoomLevel, dy = (e2.clientY-startY)/zoomLevel;
+      el.style.left = (startL+dx)+'px'; el.style.top = (startT+dy)+'px';
+      if (selected===el) updateProps();
+    }
+    function onUp() { document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp); pushHistory(); }
+    document.addEventListener('mousemove',onMove); document.addEventListener('mouseup',onUp);
+  });
+}
+
+// ─── RESIZE ───────────────────────────────────────────────────────────────────
+function attachResize(el) {
+  el.querySelectorAll('.resize-handle').forEach(handle => {
+    handle.addEventListener('mousedown', e => {
+      e.stopPropagation(); e.preventDefault();
+      let pos = handle.classList[1];
+      let startX=e.clientX, startY=e.clientY;
+      let startW=el.offsetWidth, startH=el.offsetHeight;
+      let startL=parseInt(el.style.left)||0, startT=parseInt(el.style.top)||0;
+      function onMove(e2) {
+        let dx=(e2.clientX-startX)/zoomLevel, dy=(e2.clientY-startY)/zoomLevel;
+        if(pos.includes('e')) el.style.width=Math.max(30,startW+dx)+'px';
+        if(pos.includes('s')) el.style.height=Math.max(20,startH+dy)+'px';
+        if(pos.includes('w')) { el.style.width=Math.max(30,startW-dx)+'px'; el.style.left=(startL+dx)+'px'; }
+        if(pos.includes('n')) { el.style.height=Math.max(20,startH-dy)+'px'; el.style.top=(startT+dy)+'px'; }
+        if(selected===el) updateProps();
+      }
+      function onUp() { document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp); pushHistory(); }
+      document.addEventListener('mousemove',onMove); document.addEventListener('mouseup',onUp);
+    });
+  });
+}
+
+// ─── ROTATE ───────────────────────────────────────────────────────────────────
+function attachRotate(el) {
+  let rh = el.querySelector('.rotate-handle');
+  rh.addEventListener('mousedown', e => {
+    e.stopPropagation(); e.preventDefault();
+    let rect = el.getBoundingClientRect();
+    let cx = rect.left+rect.width/2, cy = rect.top+rect.height/2;
+    function onMove(e2) {
+      let ang = Math.atan2(e2.clientY-cy, e2.clientX-cx)*(180/Math.PI)+90;
+      el.style.transform = `rotate(${ang}deg)`;
+      el.dataset.rotation = ang;
+    }
+    function onUp() { document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp); pushHistory(); }
+    document.addEventListener('mousemove',onMove); document.addEventListener('mouseup',onUp);
+  });
+}
+
+// ─── SELECT ───────────────────────────────────────────────────────────────────
+function selectEl(el) {
+  deselectAll(); selected = el; el.classList.add('selected');
+  updateProps(); updateLayers();
+}
+// NAYA:
+function deselectAll(e) {
+  // Sirf tab deselect karo jab direct canvas ya canvas-area pe click ho
+  if (e && e.target !== canvas && e.target.id !== 'canvas-area') return;
+  document.querySelectorAll('.canvas-el.selected').forEach(el => el.classList.remove('selected'));
+  selected = null; updateProps(); updateLayers();
+}
+
+// Canvas pe direct click = deselect
+document.getElementById('canvas').addEventListener('mousedown', e => {
+  if (e.target === canvas) deselectAll(e);
+});
+document.getElementById('canvas-area').addEventListener('mousedown', e => {
+  if (e.target.id === 'canvas-area') deselectAll(e);
+});
+
+// ─── PROPERTIES PANEL ─────────────────────────────────────────────────────────
+function updateProps() {
+  let pb = document.getElementById('props-body');
+  if (!selected) {
+    pb.innerHTML = `<div style="color:var(--text-muted);font-size:13px;text-align:center;margin-top:40px;line-height:1.8"><i class="fas fa-mouse-pointer" style="font-size:24px;display:block;margin-bottom:12px;opacity:.4"></i>Select an element<br>to edit its properties</div>`;
+    return;
+  }
+  let el = selected; let type = el.dataset.type;
+  let l=parseInt(el.style.left)||0, t=parseInt(el.style.top)||0;
+  let w=el.offsetWidth, h=el.offsetHeight;
+  let op = parseFloat(el.style.opacity||1)*100;
+  let html = `
+    <div class="prop-group">
+      <div class="prop-label">Position & Size</div>
+      <div class="prop-row">
+        <span style="font-size:11px;color:var(--text-muted);width:12px">X</span>
+        <input class="prop-input prop-input-sm" type="number" value="${Math.round(l)}" oninput="setProp('left',this.value+'px')">
+        <span style="font-size:11px;color:var(--text-muted);width:12px">Y</span>
+        <input class="prop-input prop-input-sm" type="number" value="${Math.round(t)}" oninput="setProp('top',this.value+'px')">
+      </div>
+      <div class="prop-row">
+        <span style="font-size:11px;color:var(--text-muted);width:12px">W</span>
+        <input class="prop-input prop-input-sm" type="number" value="${Math.round(w)}" oninput="setProp('width',this.value+'px')">
+        <span style="font-size:11px;color:var(--text-muted);width:12px">H</span>
+        <input class="prop-input prop-input-sm" type="number" value="${Math.round(h)}" oninput="setProp('height',this.value+'px')">
+      </div>
+    </div>
+    <div class="prop-group">
+      <div class="prop-label">Opacity</div>
+      <input type="range" class="opacity-slider" min="0" max="100" value="${Math.round(op)}" oninput="setProp('opacity',this.value/100)">
+    </div>`;
+  if (type==='text') {
+    let fs = parseInt(el.style.fontSize||16), fc = el.style.color||'#000';
+    let fw = el.style.fontWeight||'400', ff = el.style.fontFamily||'sans-serif';
+    let ta = el.style.textAlign||'left';
+    html += `
+    <div class="prop-group">
+      <div class="prop-label">Font</div>
+      <select class="prop-input" style="margin-bottom:6px" onchange="setProp('fontFamily',this.value)">
+        ${['Syne,sans-serif','DM Sans,sans-serif','Georgia,serif','Courier New,monospace','Impact,sans-serif','Arial,sans-serif','Times New Roman,serif'].map(f=>`<option value="${f}" ${ff.includes(f.split(',')[0])?'selected':''}>${f.split(',')[0]}</option>`).join('')}
+      </select>
+      <div class="prop-row">
+        <span style="font-size:11px;color:var(--text-muted)">Size</span>
+        <input class="prop-input" type="number" value="${fs}" oninput="setProp('fontSize',this.value+'px')" style="width:70px">
+        <span style="font-size:11px;color:var(--text-muted)">Weight</span>
+        <select class="prop-input" style="width:80px" onchange="setProp('fontWeight',this.value)">
+          ${['300','400','500','600','700','800'].map(w=>`<option value="${w}" ${fw==w?'selected':''}>${w}</option>`).join('')}
+        </select>
+      </div>
+      <div class="prop-row">
+        <button class="prop-btn ${ta=='left'?'active':''}" onclick="setProp('textAlign','left')"><i class="fas fa-align-left"></i></button>
+        <button class="prop-btn ${ta=='center'?'active':''}" onclick="setProp('textAlign','center')"><i class="fas fa-align-center"></i></button>
+        <button class="prop-btn ${ta=='right'?'active':''}" onclick="setProp('textAlign','right')"><i class="fas fa-align-right"></i></button>
+      </div>
+    </div>
+    <div class="prop-group">
+      <div class="prop-label">Text Color</div>
+      <div class="color-input-wrap">
+        <input type="color" class="color-swatch" value="${fc}" oninput="setProp('color',this.value)">
+        <input class="prop-input" value="${fc}" oninput="setProp('color',this.value)" placeholder="#color">
+      </div>
+    </div>`;
+  }
+  if (['rect','circle'].includes(type)) {
+    let bg = el.style.background || el.style.backgroundColor || '#fff';
+    let br = parseInt(el.style.borderRadius)||0;
+    html += `
+    <div class="prop-group">
+      <div class="prop-label">Fill Color</div>
+      <div class="color-input-wrap">
+        <input type="color" class="color-swatch" value="${bg.startsWith('#')?bg:'#cccccc'}" oninput="setProp('background',this.value)">
+        <input class="prop-input" value="${bg}" oninput="setProp('background',this.value)" placeholder="#color or gradient">
+      </div>
+    </div>
+    <div class="prop-group">
+      <div class="prop-label">Border Radius: ${br}px</div>
+      <input type="range" class="opacity-slider" min="0" max="200" value="${br}" oninput="setProp('borderRadius',this.value+'px')">
+    </div>
+    <div class="prop-group">
+      <div class="prop-label">Border</div>
+      <div class="prop-row">
+        <input class="prop-input" type="number" value="${parseInt(el.style.borderWidth)||0}" placeholder="Width" style="width:70px" oninput="setProp('borderWidth',this.value+'px')">
+        <input type="color" class="color-swatch" value="${el.style.borderColor||'#000'}" oninput="setProp('borderColor',this.value)">
+      </div>
+    </div>
+    <div class="prop-group">
+      <div class="prop-label">Shadow</div>
+      <select class="prop-input" onchange="setProp('boxShadow',this.value)">
+        <option value="">None</option>
+        <option value="0 4px 16px rgba(0,0,0,.2)">Soft</option>
+        <option value="0 8px 32px rgba(0,0,0,.4)">Medium</option>
+        <option value="4px 4px 0 #000">Hard</option>
+        <option value="0 0 20px rgba(124,109,250,.8)">Glow Purple</option>
+      </select>
+    </div>`;
+  }
+  // SVG Vector color change
+  if (type === 'svg') {
+    let svgEl = el.querySelector('svg');
+    let fills = svgEl ? [...svgEl.querySelectorAll('[fill]:not([fill="none"]),[stroke]:not([stroke="none"])')] : [];
+    let currentColor = fills.length > 0 ? (fills[0].getAttribute('fill') || fills[0].getAttribute('stroke') || '#7c6dfa') : '#7c6dfa';
+    if (currentColor === 'none' || !currentColor) currentColor = '#7c6dfa';
+    html += `
+    <div class="prop-group">
+      <div class="prop-label">Vector Color</div>
+      <div class="color-input-wrap">
+        <input type="color" class="color-swatch" value="${currentColor.startsWith('#') ? currentColor : '#7c6dfa'}"
+          oninput="changeSvgColor(this.value)">
+        <input class="prop-input" value="${currentColor}" placeholder="#color"
+          oninput="changeSvgColor(this.value)">
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">
+        ${['#7c6dfa','#fa6d8d','#6dfacc','#ffd93d','#4facfe','#f093fb','#43e97b','#ff6b35','#1a1a2e','#ffffff','#000000','#e74c3c'].map(c =>
+          `<div onclick="changeSvgColor('${c}')" style="width:24px;height:24px;border-radius:5px;background:${c};cursor:pointer;border:2px solid transparent;transition:all .15s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform=''"></div>`
+        ).join('')}
+      </div>
+    </div>`;
+  }
+
+  // Icon color change
+  if (type === 'icon') {
+    let ic = el.querySelector('i');
+    let currentColor = ic ? ic.style.color || el.style.color || '#1a1a2e' : '#1a1a2e';
+    html += `
+    <div class="prop-group">
+      <div class="prop-label">Icon Color</div>
+      <div class="color-input-wrap">
+        <input type="color" class="color-swatch" value="${currentColor.startsWith('#') ? currentColor : '#1a1a2e'}"
+          oninput="changeIconColor(this.value)">
+        <input class="prop-input" value="${currentColor}" placeholder="#color"
+          oninput="changeIconColor(this.value)">
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">
+        ${['#7c6dfa','#fa6d8d','#6dfacc','#ffd93d','#4facfe','#f093fb','#43e97b','#ff6b35','#1a1a2e','#ffffff','#333333','#e74c3c'].map(c =>
+          `<div onclick="changeIconColor('${c}')" style="width:24px;height:24px;border-radius:5px;background:${c};cursor:pointer;border:2px solid transparent;transition:all .15s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform=''"></div>`
+        ).join('')}
+      </div>
+      <div class="prop-label" style="margin-top:10px">Icon Size</div>
+      <input class="prop-input" type="number" value="${parseInt(el.style.fontSize)||64}" 
+        oninput="changeIconSize(this.value)" placeholder="Size in px">
+    </div>`;
+  }
+
+  // Shape (emoji) color
+  if (type === 'shape') {
+    let currentColor = el.style.color || '#7c6dfa';
+    html += `
+    <div class="prop-group">
+      <div class="prop-label">Shape Color</div>
+      <div class="color-input-wrap">
+        <input type="color" class="color-swatch" value="${currentColor.startsWith('#') ? currentColor : '#7c6dfa'}"
+          oninput="setProp('color',this.value)">
+        <input class="prop-input" value="${currentColor}" placeholder="#color"
+          oninput="setProp('color',this.value)">
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">
+        ${['#7c6dfa','#fa6d8d','#6dfacc','#ffd93d','#4facfe','#f093fb','#43e97b','#ff6b35','#1a1a2e','#e74c3c','#2ecc71','#3498db'].map(c =>
+          `<div onclick="setProp('color','${c}')" style="width:24px;height:24px;border-radius:5px;background:${c};cursor:pointer;border:2px solid transparent;transition:all .15s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform=''"></div>`
+        ).join('')}
+      </div>
+    </div>`;
+  }
+
+  html += `
+    <div class="prop-group" style="margin-top:8px">
+      <div class="prop-row">
+        <button class="prop-btn" onclick="bringForward()"><i class="fas fa-level-up-alt"></i> Forward</button>
+        <button class="prop-btn" onclick="sendBackward()"><i class="fas fa-level-down-alt"></i> Back</button>
+      </div>
+    </div>`;
+  pb.innerHTML = html;
+}
+function setProp(prop, val) {
+  if (!selected) return;
+  selected.style[prop] = val;
+}
+function setElColor(c) {
+  if (!selected) return;
+  let t = selected.dataset.type;
+  if (t==='text') selected.style.color = c;
+  else if (['rect','circle'].includes(t)) selected.style.background = c;
+  else if (t==='svg') changeSvgColor(c);
+  else if (t==='icon') changeIconColor(c);
+  else selected.style.color = c;
+}
+
+// SVG vector color change — fill aur stroke dono change karo
+function changeSvgColor(color) {
+  if (!selected || selected.dataset.type !== 'svg') return;
+  let svgEl = selected.querySelector('svg');
+  if (!svgEl) return;
+  // Fill wale elements
+  svgEl.querySelectorAll('[fill]').forEach(el => {
+    if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', color);
+  });
+  // Stroke wale elements
+  svgEl.querySelectorAll('[stroke]').forEach(el => {
+    if (el.getAttribute('stroke') !== 'none') el.setAttribute('stroke', color);
+  });
+  pushHistory();
+  updateProps();
+}
+
+// Icon color change
+function changeIconColor(color) {
+  if (!selected || selected.dataset.type !== 'icon') return;
+  selected.style.color = color;
+  let ic = selected.querySelector('i');
+  if (ic) ic.style.color = color;
+  pushHistory();
+  updateProps();
+}
+
+// Icon size change
+function changeIconSize(size) {
+  if (!selected || selected.dataset.type !== 'icon') return;
+  selected.style.fontSize = size + 'px';
+  let ic = selected.querySelector('i');
+  if (ic) ic.style.fontSize = size + 'px';
+  updateProps();
+}
+
+// ─── LAYERS ───────────────────────────────────────────────────────────────────
+function updateLayers() {
+  let ll = document.getElementById('layers-list'); ll.innerHTML='';
+  let els = [...canvas.querySelectorAll('.canvas-el')].reverse();
+  els.forEach(el => {
+    let type = el.dataset.type;
+    let icons = {text:'fa-font',rect:'fa-square',circle:'fa-circle',image:'fa-image',svg:'fa-shapes',shape:'fa-star',line:'fa-minus',arrow:'fa-arrow-right',icon:'fa-icons','3d':'fa-cube'};
+    let d = document.createElement('div');
+    d.className = 'layer-item' + (el===selected?' active':'');
+    d.innerHTML = `<i class="fas ${icons[type]||'fa-layer-group'}"></i><span style="flex:1;truncate;font-size:12px">${type} #${el.dataset.id}</span>`;
+    d.onclick = () => selectEl(el);
+    ll.appendChild(d);
+  });
+}
+
+// ─── HISTORY ─────────────────────────────────────────────────────────────────
+function pushHistory() {
+  history = history.slice(0, histIdx+1);
+  history.push(canvas.innerHTML);
+  histIdx = history.length-1;
+  if (history.length > 50) { history.shift(); histIdx--; }
+}
+function undo() {
+  if (histIdx<=0) return;
+  histIdx--; canvas.innerHTML = history[histIdx]; selected=null;
+  reattachAll(); updateProps(); updateLayers();
+}
+function redo() {
+  if (histIdx >= history.length-1) return;
+  histIdx++; canvas.innerHTML = history[histIdx]; selected=null;
+  reattachAll(); updateProps(); updateLayers();
+}
+function reattachAll() {
+  canvas.querySelectorAll('.canvas-el').forEach(el => {
+    let del = el.querySelector('.delete-handle');
+    if (del) del.onclick = e => { e.stopPropagation(); el.remove(); selected=null; updateProps(); updateLayers(); pushHistory(); };
+    attachDrag(el); attachResize(el); attachRotate(el);
+    if (el.dataset.type==='text') {
+      el.ondblclick = () => { el.setAttribute('contenteditable','true'); el.focus(); };
+      el.onblur = () => { el.setAttribute('contenteditable','false'); pushHistory(); };
+    }
+  });
+}
+pushHistory();
+
+// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+function deleteSelected() { if(selected) { selected.remove(); selected=null; updateProps(); updateLayers(); pushHistory(); } }
+function duplicateSelected() {
+  if (!selected) return;
+  let clone = selected.cloneNode(true);
+  clone.dataset.id = ++elCounter;
+  clone.style.left = (parseInt(clone.style.left)+20)+'px';
+  clone.style.top = (parseInt(clone.style.top)+20)+'px';
+  clone.style.zIndex = elCounter;
+  canvas.appendChild(clone);
+  let del = clone.querySelector('.delete-handle');
+  if (del) del.onclick = e => { e.stopPropagation(); clone.remove(); selected=null; updateProps(); updateLayers(); pushHistory(); };
+  attachDrag(clone); attachResize(clone); attachRotate(clone);
+  if (clone.dataset.type==='text') {
+    clone.ondblclick = () => { clone.setAttribute('contenteditable','true'); clone.focus(); };
+    clone.onblur = () => { clone.setAttribute('contenteditable','false'); pushHistory(); };
+  }
+  selectEl(clone); pushHistory(); updateLayers();
+}
+function bringForward() { if(!selected) return; let z=parseInt(selected.style.zIndex||1); selected.style.zIndex=z+1; }
+function sendBackward() { if(!selected) return; let z=parseInt(selected.style.zIndex||1); selected.style.zIndex=Math.max(0,z-1); }
+function alignLeft() { if(selected) selected.style.left='0px'; }
+function alignCenter() { if(selected) { let w=selected.offsetWidth; selected.style.left=((cw-w)/2)+'px'; } }
+
+// ─── KEYBOARD ─────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (document.activeElement.getAttribute('contenteditable')==='true') return;
+  if ((e.key==='Delete'||e.key==='Backspace') && selected) { e.preventDefault(); deleteSelected(); }
+  if (e.ctrlKey && e.key==='z') { e.preventDefault(); undo(); }
+  if (e.ctrlKey && e.key==='y') { e.preventDefault(); redo(); }
+  if (e.ctrlKey && e.key==='d') { e.preventDefault(); duplicateSelected(); }
+  if (selected && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
+    e.preventDefault();
+    let step = e.shiftKey?10:1;
+    if (e.key==='ArrowLeft') selected.style.left=(parseInt(selected.style.left)-step)+'px';
+    if (e.key==='ArrowRight') selected.style.left=(parseInt(selected.style.left)+step)+'px';
+    if (e.key==='ArrowUp') selected.style.top=(parseInt(selected.style.top)-step)+'px';
+    if (e.key==='ArrowDown') selected.style.top=(parseInt(selected.style.top)+step)+'px';
+    updateProps();
+  }
+});
+
+// ─── CONTEXT MENU ─────────────────────────────────────────────────────────────
+canvas.addEventListener('contextmenu', e => {
+  if (!selected) return;
+  e.preventDefault();
+  let m = document.getElementById('ctx-menu');
+  m.style.display='block'; m.style.left=e.clientX+'px'; m.style.top=e.clientY+'px';
+});
+document.addEventListener('click', () => document.getElementById('ctx-menu').style.display='none');
+
+// ─── DESIGN ID (Flask se milta hai) ──────────────────────────────────────────
+let DESIGN_ID = "{{ design_id }}" || null;
+if (DESIGN_ID === "" || DESIGN_ID === "None") DESIGN_ID = null;
+let saveTimer = null;
+
+// ─── UPLOAD IMAGE ─────────────────────────────────────────────────────────────
+function uploadImage(input) {
+  let file = input.files[0]; if (!file) return;
+  let fd = new FormData(); fd.append('file', file);
+  showToast('⏳ Upload ho raha hai...');
+  fetch('/api/uploads', { method: 'POST', body: fd })
+    .then(r => r.json()).then(d => {
+      if (d.url) {
+        addImage(d.url);
+        addThumb(d.url);
+        showToast('✅ Image upload ho gaya!');
+      } else {
+        showToast('❌ ' + (d.error || 'Upload failed'));
+      }
+    }).catch(() => showToast('❌ Server error'));
+  input.value = '';
+}
+function addThumb(url) {
+  let img = document.createElement('img');
+  img.src = url; img.className = 'thumb-img';
+  img.onclick = () => addImage(url);
+  document.getElementById('uploaded-imgs').prepend(img);
+}
+async function loadUserUploads() {
+  try {
+    let r = await fetch('/api/uploads');
+    let d = await r.json();
+    let panel = document.getElementById('uploaded-imgs');
+    panel.innerHTML = '';
+    (d.uploads || []).forEach(u => addThumb(u.url));
+  } catch(e) {}
+}
+// Drag-over upload
+let ua = document.getElementById('upload-area');
+ua.addEventListener('dragover', e => { e.preventDefault(); ua.style.borderColor = 'var(--accent)'; });
+ua.addEventListener('dragleave', () => ua.style.borderColor = '');
+ua.addEventListener('drop', e => {
+  e.preventDefault(); ua.style.borderColor = '';
+  let f = e.dataTransfer.files[0];
+  if (f) { let inp = document.getElementById('file-input'); let dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files; uploadImage(inp); }
+});
+
+// ─── SAVE DESIGN ─────────────────────────────────────────────────────────────
+async function saveDesign() {
+  if (!DESIGN_ID) { showToast('⚠️ Dashboard se design open karein'); return; }
+  let name = document.getElementById('design-name-field').value.trim() || 'Untitled Design';
+  let canvasData = {
+    html: canvas.innerHTML,
+    bg: canvas.style.background || canvas.style.backgroundColor || '#ffffff',
+    width: cw, height: ch
+  };
+  // Thumbnail
+  let thumbnail = '';
+  try {
+    let tc = await html2canvas(canvas, { scale: 0.25, useCORS: true, backgroundColor: null, logging: false });
+    thumbnail = tc.toDataURL('image/jpeg', 0.6);
+  } catch(e) {}
+
+  let r = await fetch('/api/designs/' + DESIGN_ID, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, canvas_data: canvasData, thumbnail })
+  });
+  let d = await r.json();
+  if (d.success) showToast('💾 Saved!');
+  else showToast('❌ ' + (d.error || 'Save nahi hua'));
+}
+
+function scheduleSave() {
+  if (!DESIGN_ID) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveDesign, 2500);
+}
+
+// ─── LOAD DESIGN ─────────────────────────────────────────────────────────────
+async function loadDesign() {
+  if (!DESIGN_ID) return;
+  try {
+    let r = await fetch('/api/designs/' + DESIGN_ID);
+    if (!r.ok) return;
+    let d = await r.json();
+    document.getElementById('design-name-field').value = d.name || 'Untitled Design';
+    document.title = (d.name || 'Untitled') + ' – DesignEase';
+    let data = {};
+    try { data = typeof d.canvas_data === 'string' ? JSON.parse(d.canvas_data) : (d.canvas_data || {}); } catch(e) {}
+    if (d.width && d.height) { cw = d.width; ch = d.height; canvas.style.width = cw + 'px'; canvas.style.height = ch + 'px'; }
+    if (data.html) {
+      canvas.innerHTML = data.html;
+      if (data.bg) canvas.style.background = data.bg;
+      reattachAll(); updateLayers(); pushHistory();
+      showToast('✅ Design load ho gaya');
+    }
+    fitZoom();
+  } catch(e) { console.error('Load error:', e); }
+}
+
+// ─── EXPORT PNG ───────────────────────────────────────────────────────────────
+function exportDesign() {
+  showToast('⏳ PNG generate ho raha hai...');
+  let prev = selected; deselectAll();
+  setTimeout(() => {
+    html2canvas(canvas, { scale: 2, useCORS: true, backgroundColor: canvas.style.background || '#fff', logging: false })
+      .then(c => {
+        let a = document.createElement('a');
+        let name = (document.getElementById('design-name-field').value.trim() || 'design').replace(/[^a-z0-9]/gi, '_');
+        a.download = name + '.png'; a.href = c.toDataURL('image/png'); a.click();
+        showToast('✅ PNG download ho gaya!');
+        if (prev) selectEl(prev);
+      }).catch(() => showToast('❌ Export failed'));
+  }, 200);
+}
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  let t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('resize', fitZoom);
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  GRAPHICS SYSTEM — Vectors, Icons, Photos
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ── SVG Vectors ───────────────────────────────────────────────────────────
+const SVG_VECTORS = [
+  { name:'Star',      color:'#7c6dfa', svg:'<svg viewBox="0 0 100 100"><polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" fill="#7c6dfa"/></svg>' },
+  { name:'Heart',     color:'#fa6d8d', svg:'<svg viewBox="0 0 100 100"><path d="M50,30 C35,10 10,20 10,45 C10,70 50,90 50,90 C50,90 90,70 90,45 C90,20 65,10 50,30Z" fill="#fa6d8d"/></svg>' },
+  { name:'Arrow R',   color:'#6dfacc', svg:'<svg viewBox="0 0 100 50"><polygon points="0,10 60,10 60,0 100,25 60,50 60,40 0,40" fill="#6dfacc"/></svg>' },
+  { name:'Arrow L',   color:'#ffd93d', svg:'<svg viewBox="0 0 100 50"><polygon points="100,10 40,10 40,0 0,25 40,50 40,40 100,40" fill="#ffd93d"/></svg>' },
+  { name:'Diamond',   color:'#4facfe', svg:'<svg viewBox="0 0 100 100"><polygon points="50,5 95,50 50,95 5,50" fill="#4facfe"/></svg>' },
+  { name:'Hexagon',   color:'#f093fb', svg:'<svg viewBox="0 0 100 100"><polygon points="50,5 93,27 93,73 50,95 7,73 7,27" fill="#f093fb"/></svg>' },
+  { name:'Pentagon',  color:'#43e97b', svg:'<svg viewBox="0 0 100 100"><polygon points="50,5 97,38 79,95 21,95 3,38" fill="#43e97b"/></svg>' },
+  { name:'Burst',     color:'#ff6b35', svg:'<svg viewBox="0 0 100 100"><polygon points="50,2 58,35 90,20 72,48 98,58 68,65 78,95 50,78 22,95 32,65 2,58 28,48 10,20 42,35" fill="#ff6b35"/></svg>' },
+  { name:'Cross',     color:'#7c6dfa', svg:'<svg viewBox="0 0 100 100"><rect x="35" y="5" width="30" height="90" rx="5" fill="#7c6dfa"/><rect x="5" y="35" width="90" height="30" rx="5" fill="#7c6dfa"/></svg>' },
+  { name:'Check',     color:'#6dfacc', svg:'<svg viewBox="0 0 100 100"><polyline points="10,55 40,80 90,20" fill="none" stroke="#6dfacc" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  { name:'Infinity',  color:'#fa6d8d', svg:'<svg viewBox="0 0 120 60"><path d="M60,30 C60,10 30,10 20,30 C10,50 30,50 60,30 C60,10 90,10 100,30 C110,50 90,50 60,30Z" fill="none" stroke="#fa6d8d" stroke-width="7"/></svg>' },
+  { name:'Wave',      color:'#4facfe', svg:'<svg viewBox="0 0 120 60"><path d="M0,30 C20,5 40,5 60,30 C80,55 100,55 120,30" fill="none" stroke="#4facfe" stroke-width="8" stroke-linecap="round"/></svg>' },
+  { name:'Zigzag',    color:'#ffd93d', svg:'<svg viewBox="0 0 120 60"><polyline points="0,50 20,10 40,50 60,10 80,50 100,10 120,50" fill="none" stroke="#ffd93d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  { name:'Shield',    color:'#7c6dfa', svg:'<svg viewBox="0 0 100 110"><path d="M50,5 L95,25 L95,60 C95,82 75,100 50,108 C25,100 5,82 5,60 L5,25 Z" fill="#7c6dfa"/></svg>' },
+  { name:'Badge',     color:'#ffd93d', svg:'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#ffd93d"/><circle cx="50" cy="50" r="35" fill="none" stroke="#ff6b35" stroke-width="4"/><polygon points="50,20 56,38 75,38 61,49 66,67 50,56 34,67 39,49 25,38 44,38" fill="#ff6b35"/></svg>' },
+  { name:'Circle',    color:'#fa6d8d', svg:'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#fa6d8d"/></svg>' },
+  { name:'Ring',      color:'#6dfacc', svg:'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#6dfacc" stroke-width="12"/></svg>' },
+  { name:'Triangle',  color:'#f093fb', svg:'<svg viewBox="0 0 100 100"><polygon points="50,5 95,95 5,95" fill="#f093fb"/></svg>' },
+  { name:'Rounded R', color:'#43e97b', svg:'<svg viewBox="0 0 120 60"><rect x="5" y="5" width="110" height="50" rx="25" fill="#43e97b"/></svg>' },
+  { name:'Spiral',    color:'#4facfe', svg:'<svg viewBox="0 0 100 100"><path d="M50,50 C50,30 70,30 70,50 C70,70 30,70 30,50 C30,20 80,20 80,50 C80,82 18,82 18,50 C18,10 90,10 90,50" fill="none" stroke="#4facfe" stroke-width="5" stroke-linecap="round"/></svg>' },
+  { name:'Lightning', color:'#ffd93d', svg:'<svg viewBox="0 0 60 100"><polygon points="35,5 10,55 30,55 25,95 50,45 30,45" fill="#ffd93d"/></svg>' },
+  { name:'Cloud',     color:'#7c6dfa', svg:'<svg viewBox="0 0 120 80"><ellipse cx="60" cy="55" rx="55" ry="25" fill="#7c6dfa"/><circle cx="35" cy="45" r="22" fill="#7c6dfa"/><circle cx="65" cy="35" r="28" fill="#7c6dfa"/><circle cx="90" cy="45" r="20" fill="#7c6dfa"/></svg>' },
+  { name:'Leaf',      color:'#43e97b', svg:'<svg viewBox="0 0 100 100"><path d="M50,90 C50,90 10,60 10,30 C10,10 30,5 50,10 C70,5 90,10 90,30 C90,60 50,90 50,90Z" fill="#43e97b"/></svg>' },
+  { name:'Moon',      color:'#f093fb', svg:'<svg viewBox="0 0 100 100"><path d="M65,20 C40,20 20,40 20,65 C20,82 30,95 45,98 C25,88 15,70 20,50 C27,25 55,12 75,20 C72,19 68,18 65,20Z" fill="#f093fb"/></svg>' },
+  // ── More Arrows ───────────────────────────────────────────────────────────
+  { name:'Arrow Up',   color:'#6dfacc', svg:'<svg viewBox="0 0 50 100"><polygon points="10,60 25,5 40,60 33,60 33,95 17,95 17,60" fill="#6dfacc"/></svg>' },
+  { name:'Arrow Down', color:'#ffd93d', svg:'<svg viewBox="0 0 50 100"><polygon points="10,40 25,95 40,40 33,40 33,5 17,5 17,40" fill="#ffd93d"/></svg>' },
+  { name:'Dbl Arrow',  color:'#fa6d8d', svg:'<svg viewBox="0 0 120 40"><polygon points="0,20 20,5 20,35" fill="#fa6d8d"/><line x1="20" y1="20" x2="100" y2="20" stroke="#fa6d8d" stroke-width="6"/><polygon points="120,20 100,5 100,35" fill="#fa6d8d"/></svg>' },
+  { name:'Curved Arr', color:'#7c6dfa', svg:'<svg viewBox="0 0 100 100"><path d="M10,70 Q10,20 60,20" fill="none" stroke="#7c6dfa" stroke-width="8" stroke-linecap="round"/><polygon points="60,5 80,25 50,30" fill="#7c6dfa"/></svg>' },
+  // ── Decorative ────────────────────────────────────────────────────────────
+  { name:'Flower',     color:'#fa6d8d', svg:'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="12" fill="#fa6d8d"/><ellipse cx="50" cy="25" rx="10" ry="18" fill="#fa6d8d" opacity=".8"/><ellipse cx="50" cy="75" rx="10" ry="18" fill="#fa6d8d" opacity=".8"/><ellipse cx="25" cy="50" rx="18" ry="10" fill="#fa6d8d" opacity=".8"/><ellipse cx="75" cy="50" rx="18" ry="10" fill="#fa6d8d" opacity=".8"/><ellipse cx="32" cy="32" rx="10" ry="18" fill="#fa6d8d" transform="rotate(45,32,32)" opacity=".7"/><ellipse cx="68" cy="32" rx="10" ry="18" fill="#fa6d8d" transform="rotate(-45,68,32)" opacity=".7"/><ellipse cx="32" cy="68" rx="10" ry="18" fill="#fa6d8d" transform="rotate(-45,32,68)" opacity=".7"/><ellipse cx="68" cy="68" rx="10" ry="18" fill="#fa6d8d" transform="rotate(45,68,68)" opacity=".7"/></svg>' },
+  { name:'Sun',        color:'#ffd93d', svg:'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="20" fill="#ffd93d"/><line x1="50" y1="5" x2="50" y2="20" stroke="#ffd93d" stroke-width="6" stroke-linecap="round"/><line x1="50" y1="80" x2="50" y2="95" stroke="#ffd93d" stroke-width="6" stroke-linecap="round"/><line x1="5" y1="50" x2="20" y2="50" stroke="#ffd93d" stroke-width="6" stroke-linecap="round"/><line x1="80" y1="50" x2="95" y2="50" stroke="#ffd93d" stroke-width="6" stroke-linecap="round"/><line x1="19" y1="19" x2="30" y2="30" stroke="#ffd93d" stroke-width="6" stroke-linecap="round"/><line x1="70" y1="70" x2="81" y2="81" stroke="#ffd93d" stroke-width="6" stroke-linecap="round"/><line x1="81" y1="19" x2="70" y2="30" stroke="#ffd93d" stroke-width="6" stroke-linecap="round"/><line x1="30" y1="70" x2="19" y2="81" stroke="#ffd93d" stroke-width="6" stroke-linecap="round"/></svg>' },
+  { name:'Snowflake',  color:'#4facfe', svg:'<svg viewBox="0 0 100 100"><line x1="50" y1="5" x2="50" y2="95" stroke="#4facfe" stroke-width="6"/><line x1="5" y1="50" x2="95" y2="50" stroke="#4facfe" stroke-width="6"/><line x1="19" y1="19" x2="81" y2="81" stroke="#4facfe" stroke-width="6"/><line x1="81" y1="19" x2="19" y2="81" stroke="#4facfe" stroke-width="6"/><circle cx="50" cy="50" r="8" fill="#4facfe"/></svg>' },
+  { name:'Crown',      color:'#ffd93d', svg:'<svg viewBox="0 0 100 80"><polygon points="10,70 20,20 40,50 50,10 60,50 80,20 90,70" fill="#ffd93d"/><rect x="10" y="70" width="80" height="10" rx="3" fill="#ffd93d"/></svg>' },
+  { name:'Location',   color:'#fa6d8d', svg:'<svg viewBox="0 0 60 100"><path d="M30,5 C15,5 5,15 5,30 C5,55 30,95 30,95 C30,95 55,55 55,30 C55,15 45,5 30,5Z" fill="#fa6d8d"/><circle cx="30" cy="30" r="10" fill="white"/></svg>' },
+  { name:'Chat',       color:'#7c6dfa', svg:'<svg viewBox="0 0 100 90"><rect x="5" y="5" width="90" height="65" rx="12" fill="#7c6dfa"/><polygon points="20,70 10,90 40,70" fill="#7c6dfa"/></svg>' },
+  { name:'Chat 2',     color:'#6dfacc', svg:'<svg viewBox="0 0 100 90"><rect x="5" y="5" width="90" height="65" rx="12" fill="none" stroke="#6dfacc" stroke-width="6"/><polygon points="20,70 10,90 40,70" fill="none" stroke="#6dfacc" stroke-width="6" stroke-linejoin="round"/><line x1="25" y1="30" x2="75" y2="30" stroke="#6dfacc" stroke-width="5" stroke-linecap="round"/><line x1="25" y1="45" x2="55" y2="45" stroke="#6dfacc" stroke-width="5" stroke-linecap="round"/></svg>' },
+  { name:'Bookmark',   color:'#f093fb', svg:'<svg viewBox="0 0 70 100"><path d="M5,5 L65,5 L65,95 L35,72 L5,95 Z" fill="#f093fb"/></svg>' },
+  { name:'Flag',       color:'#ff6b35', svg:'<svg viewBox="0 0 80 100"><line x1="10" y1="5" x2="10" y2="95" stroke="#ff6b35" stroke-width="6" stroke-linecap="round"/><polygon points="10,10 70,25 10,45" fill="#ff6b35"/></svg>' },
+  // ── Symbols ───────────────────────────────────────────────────────────────
+  { name:'Play',       color:'#43e97b', svg:'<svg viewBox="0 0 100 100"><polygon points="20,10 80,50 20,90" fill="#43e97b"/></svg>' },
+  { name:'Pause',      color:'#4facfe', svg:'<svg viewBox="0 0 100 100"><rect x="15" y="10" width="28" height="80" rx="5" fill="#4facfe"/><rect x="57" y="10" width="28" height="80" rx="5" fill="#4facfe"/></svg>' },
+  { name:'Record',     color:'#fa6d8d', svg:'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="#fa6d8d" stroke-width="6"/><circle cx="50" cy="50" r="28" fill="#fa6d8d"/></svg>' },
+  { name:'Power',      color:'#7c6dfa', svg:'<svg viewBox="0 0 100 100"><path d="M50,10 L50,50" fill="none" stroke="#7c6dfa" stroke-width="8" stroke-linecap="round"/><path d="M30,22 A35,35 0 1,0 70,22" fill="none" stroke="#7c6dfa" stroke-width="8" stroke-linecap="round"/></svg>' },
+  { name:'Recycle',    color:'#43e97b', svg:'<svg viewBox="0 0 100 100"><path d="M50,10 L70,45 L55,45 L55,70 L45,70 L45,45 L30,45 Z" fill="#43e97b"/><path d="M25,60 L10,90 L45,90 L40,75" fill="#43e97b"/><path d="M75,60 L90,90 L55,90 L60,75" fill="#43e97b"/></svg>' },
+  { name:'Target',     color:'#ff6b35', svg:'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="#ff6b35" stroke-width="5"/><circle cx="50" cy="50" r="30" fill="none" stroke="#ff6b35" stroke-width="5"/><circle cx="50" cy="50" r="15" fill="none" stroke="#ff6b35" stroke-width="5"/><circle cx="50" cy="50" r="5" fill="#ff6b35"/></svg>' },
+  { name:'Funnel',     color:'#f093fb', svg:'<svg viewBox="0 0 100 100"><polygon points="5,10 95,10 60,50 60,90 40,90 40,50" fill="#f093fb"/></svg>' },
+  // ── Frames ────────────────────────────────────────────────────────────────
+  { name:'Frame Sq',   color:'#7c6dfa', svg:'<svg viewBox="0 0 100 100"><rect x="5" y="5" width="90" height="90" rx="4" fill="none" stroke="#7c6dfa" stroke-width="6"/><rect x="20" y="20" width="60" height="60" rx="4" fill="none" stroke="#7c6dfa" stroke-width="3"/></svg>' },
+  { name:'Frame Rd',   color:'#fa6d8d', svg:'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="#fa6d8d" stroke-width="6"/><circle cx="50" cy="50" r="30" fill="none" stroke="#fa6d8d" stroke-width="3"/></svg>' },
+  { name:'Dashed Sq',  color:'#4facfe', svg:'<svg viewBox="0 0 100 100"><rect x="5" y="5" width="90" height="90" rx="4" fill="none" stroke="#4facfe" stroke-width="5" stroke-dasharray="12,6"/></svg>' },
+  { name:'Corner Fr',  color:'#ffd93d', svg:'<svg viewBox="0 0 100 100"><path d="M5,35 L5,5 L35,5" fill="none" stroke="#ffd93d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M65,5 L95,5 L95,35" fill="none" stroke="#ffd93d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M95,65 L95,95 L65,95" fill="none" stroke="#ffd93d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M35,95 L5,95 L5,65" fill="none" stroke="#ffd93d" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  // ── Lines & Dividers ──────────────────────────────────────────────────────
+  { name:'Line Dbl',   color:'#7c6dfa', svg:'<svg viewBox="0 0 120 40"><line x1="5" y1="14" x2="115" y2="14" stroke="#7c6dfa" stroke-width="4"/><line x1="5" y1="26" x2="115" y2="26" stroke="#7c6dfa" stroke-width="4"/></svg>' },
+  { name:'Line Dash',  color:'#fa6d8d', svg:'<svg viewBox="0 0 120 20"><line x1="5" y1="10" x2="115" y2="10" stroke="#fa6d8d" stroke-width="5" stroke-dasharray="15,8" stroke-linecap="round"/></svg>' },
+  { name:'Line Dot',   color:'#6dfacc', svg:'<svg viewBox="0 0 120 20"><line x1="5" y1="10" x2="115" y2="10" stroke="#6dfacc" stroke-width="5" stroke-dasharray="2,10" stroke-linecap="round"/></svg>' },
+  { name:'Divider',    color:'#ffd93d', svg:'<svg viewBox="0 0 120 30"><line x1="5" y1="15" x2="45" y2="15" stroke="#ffd93d" stroke-width="4"/><circle cx="60" cy="15" r="7" fill="#ffd93d"/><line x1="75" y1="15" x2="115" y2="15" stroke="#ffd93d" stroke-width="4"/></svg>' },
+];
+
+// ── FA Icons list ─────────────────────────────────────────────────────────
+const FA_ICONS_ALL = [
+  'fa-heart','fa-star','fa-home','fa-user','fa-camera','fa-music','fa-car','fa-plane',
+  'fa-coffee','fa-tree','fa-sun','fa-moon','fa-cloud','fa-fire','fa-bolt','fa-leaf',
+  'fa-globe','fa-map-marker-alt','fa-phone','fa-envelope','fa-lock','fa-key','fa-crown',
+  'fa-gem','fa-gift','fa-bell','fa-bookmark','fa-flag','fa-rocket','fa-trophy',
+  'fa-thumbs-up','fa-thumbs-down','fa-smile','fa-laugh','fa-sad-tear','fa-angry',
+  'fa-check','fa-times','fa-plus','fa-minus','fa-arrow-right','fa-arrow-left',
+  'fa-search','fa-cog','fa-trash','fa-edit','fa-download','fa-upload','fa-share',
+  'fa-shopping-cart','fa-shopping-bag','fa-tag','fa-credit-card','fa-wallet',
+  'fa-chart-bar','fa-chart-line','fa-chart-pie','fa-table','fa-list',
+  'fa-desktop','fa-laptop','fa-mobile-alt','fa-tablet-alt','fa-keyboard',
+  'fa-wifi','fa-battery-full','fa-plug','fa-headphones','fa-microphone',
+  'fa-video','fa-film','fa-image','fa-paint-brush','fa-palette','fa-pen',
+  'fa-graduation-cap','fa-book','fa-newspaper','fa-file','fa-folder',
+  'fa-calendar','fa-clock','fa-hourglass','fa-stopwatch',
+  'fa-map','fa-compass','fa-road','fa-mountain','fa-water',
+  'fa-apple-alt','fa-carrot','fa-pizza-slice','fa-hamburger','fa-ice-cream',
+  'fa-heartbeat','fa-stethoscope','fa-syringe','fa-pills','fa-hospital',
+  'fa-dumbbell','fa-running','fa-football-ball','fa-basketball-ball',
+  'fa-gamepad','fa-chess','fa-dice','fa-puzzle-piece','fa-robot',
+  'fa-cat','fa-dog','fa-horse','fa-fish','fa-dove',
+  'fa-seedling','fa-cactus','fa-snowflake','fa-rainbow','fa-umbrella',
+  'fa-anchor','fa-ship','fa-bicycle','fa-bus','fa-train','fa-helicopter',
+  'fa-building','fa-city','fa-church','fa-school','fa-hotel',
+  'fa-tools','fa-hammer','fa-wrench','fa-cogs',
+];
+let iconsOffset = 0;
+const ICONS_PER_PAGE = 40;
+
+// ── Photos (Picsum) ───────────────────────────────────────────────────────
+let photoQuery = 'nature';
+let photoPage  = 1;
+
+// ── Graphics subtab switch ────────────────────────────────────────────────
+let currentGTab = 'vectors';
+
+function switchGraphicsTab(name, el) {
+  document.querySelectorAll('.g-subtab').forEach(t => {
+    t.style.background = 'transparent';
+    t.style.color = 'var(--text-muted)';
+  });
+  el.style.background = 'var(--accent)';
+  el.style.color = '#fff';
+
+  document.querySelectorAll('.g-section').forEach(s => s.style.display = 'none');
+  document.getElementById('gsec-' + name).style.display = 'block';
+  currentGTab = name;
+
+  document.getElementById('g-search').value = '';
+
+  if (name === 'vectors' && document.getElementById('vectors-grid').children.length === 0) {
+    renderVectors(SVG_VECTORS);
+  }
+  if (name === 'icons' && document.getElementById('icons-grid').children.length === 0) {
+    iconsOffset = 0;
+    renderIcons(FA_ICONS_ALL.slice(0, ICONS_PER_PAGE));
+  }
+  if (name === 'photos' && document.getElementById('photos-grid').children.length === 0) {
+    loadPhotos('nature', 1, false);
+  }
+}
+
+// ── Render Vectors ────────────────────────────────────────────────────────
+function renderVectors(list) {
+  let grid = document.getElementById('vectors-grid');
+  grid.innerHTML = '';
+  list.forEach(v => {
+    let item = document.createElement('div');
+    item.style.cssText = 'aspect-ratio:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:6px;transition:all .15s;overflow:hidden;';
+    item.innerHTML = v.svg;
+    item.title = v.name;
+    item.onmouseover = () => { item.style.borderColor = 'var(--accent)'; item.style.transform = 'scale(1.06)'; };
+    item.onmouseout  = () => { item.style.borderColor = 'var(--border)'; item.style.transform = ''; };
+    item.onclick = () => {
+      makeEl('svg', {width:'120px',height:'120px',minHeight:'120px'}, v.svg);
+      showToast('✅ ' + v.name + ' added!');
+    };
+    grid.appendChild(item);
+  });
+}
+
+// ── Render Icons ──────────────────────────────────────────────────────────
+function renderIcons(list, append = false) {
+  let grid = document.getElementById('icons-grid');
+  if (!append) grid.innerHTML = '';
+  list.forEach(ic => {
+    let item = document.createElement('div');
+    item.style.cssText = 'aspect-ratio:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;transition:all .15s;';
+    item.innerHTML = `<i class="fas ${ic}" style="color:var(--text)"></i>`;
+    item.title = ic.replace('fa-','');
+    item.onmouseover = () => { item.style.borderColor = 'var(--accent)'; item.style.transform = 'scale(1.06)'; };
+    item.onmouseout  = () => { item.style.borderColor = 'var(--border)'; item.style.transform = ''; };
+    item.onclick = () => {
+      makeEl('icon', 'fontSize:64px;width:80px;minHeight:80px;textAlign:center;lineHeight:1;color:#1a1a2e',
+        `<i class="fas ${ic}" style="font-size:64px;pointer-events:none;"></i>`);
+      showToast('✅ Icon added!');
+    };
+    grid.appendChild(item);
+  });
+}
+
+function loadMoreIcons() {
+  iconsOffset += ICONS_PER_PAGE;
+  let next = FA_ICONS_ALL.slice(iconsOffset, iconsOffset + ICONS_PER_PAGE);
+  if (next.length > 0) renderIcons(next, true);
+  if (iconsOffset + ICONS_PER_PAGE >= FA_ICONS_ALL.length) {
+    document.getElementById('icons-load-more').style.display = 'none';
+  }
+}
+
+// ── Load Photos (Picsum) ──────────────────────────────────────────────────
+function loadPhotos(query, page, append) {
+  let grid = document.getElementById('photos-grid');
+  if (!append) grid.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:20px;color:var(--text-muted);font-size:12px;"><i class="fas fa-spinner fa-spin"></i></div>';
+
+  let photos = [];
+  for (let i = 0; i < 8; i++) {
+    let seed = (query || 'nature') + (page * 10 + i);
+    photos.push({
+      thumb: `https://picsum.photos/seed/${encodeURIComponent(seed)}/150/150`,
+      full:  `https://picsum.photos/seed/${encodeURIComponent(seed)}/800/800`,
+    });
+  }
+
+  if (!append) grid.innerHTML = '';
+  photos.forEach(p => {
+    let item = document.createElement('div');
+    item.style.cssText = 'aspect-ratio:1;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .15s;background:#eee;';
+    item.innerHTML = `<img src="${p.thumb}" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">`;
+    item.onmouseover = () => item.style.borderColor = 'var(--accent)';
+    item.onmouseout  = () => item.style.borderColor = 'transparent';
+    item.onclick = () => {
+      addImage(p.full);
+      showToast('✅ Photo added!');
+    };
+    grid.appendChild(item);
+  });
+}
+
+function loadMorePhotos() {
+  photoPage++;
+  loadPhotos(photoQuery, photoPage, true);
+}
+
+// ── Search Graphics ───────────────────────────────────────────────────────
+function searchGraphics(query) {
+  query = (query || '').toLowerCase().trim();
+  if (currentGTab === 'vectors') {
+    let filtered = query
+      ? SVG_VECTORS.filter(v => v.name.toLowerCase().includes(query))
+      : SVG_VECTORS;
+    renderVectors(filtered);
+  } else if (currentGTab === 'icons') {
+    let filtered = query
+      ? FA_ICONS_ALL.filter(ic => ic.replace('fa-','').includes(query))
+      : FA_ICONS_ALL.slice(0, ICONS_PER_PAGE);
+    renderIcons(filtered.slice(0, 60));
+    document.getElementById('icons-load-more').style.display = query ? 'none' : 'block';
+  } else if (currentGTab === 'photos') {
+    photoQuery = query || 'nature';
+    photoPage  = 1;
+    loadPhotos(photoQuery, 1, false);
+  }
+}
+
+// ── Auto-init Graphics tab on click ──────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Init vectors immediately (they're shown first)
+  setTimeout(() => {
+    renderVectors(SVG_VECTORS);
+  }, 100);
+});
+
+
+async function initEditor() {
+  if (DESIGN_ID) {
+    await loadDesign();
+  } else {
+    applyCanvasSize('1080x1080');
+    setTimeout(() => {
+      addText('DesignEase Editor', 36, '#1a1a2e', '800');
+      if (selected) { selected.style.left = (cw/2 - 200) + 'px'; selected.style.top = '200px'; }
+    }, 100);
+  }
+  loadUserUploads();
+}
+initEditor();
+
+var ALL_ELEMENTS = [
+  { name:'Rectangle',  tags:['rect','rectangle','box','square'],       icon:'⬜', cat:'Shapes',   fn: ()=>addRect() },
+  { name:'Circle',     tags:['circle','round','oval','gol'],           icon:'⭕', cat:'Shapes',   fn: ()=>addCircle() },
+  { name:'Triangle',   tags:['triangle','trikona'],                    icon:'🔺', cat:'Shapes',   fn: ()=>addTriangle() },
+  { name:'Star',       tags:['star','sitara'],                         icon:'⭐', cat:'Shapes',   fn: ()=>addStar() },
+  { name:'Line',       tags:['line','lakeer','divider'],               icon:'➖', cat:'Shapes',   fn: ()=>addLine() },
+  { name:'Arrow',      tags:['arrow','teer','pointer'],                icon:'➡️', cat:'Shapes',   fn: ()=>addArrow() },
+  { name:'Heart',      tags:['heart','dil','love'],                    icon:'❤️', cat:'Shapes',   fn: ()=>addShape('heart') },
+  { name:'Diamond',    tags:['diamond','heera'],                       icon:'💎', cat:'Shapes',   fn: ()=>addShape('diamond') },
+  { name:'Hexagon',    tags:['hexagon','hex'],                         icon:'⬡',  cat:'Shapes',   fn: ()=>addShape('hex') },
+  { name:'Check',      tags:['check','tick','sahi','done'],            icon:'✅', cat:'Shapes',   fn: ()=>addShape('check') },
+  { name:'Lightning',  tags:['lightning','bijli','bolt'],              icon:'⚡', cat:'Shapes',   fn: ()=>addShape('lightning') },
+  { name:'Moon',       tags:['moon','chand'],                          icon:'🌙', cat:'Shapes',   fn: ()=>addShape('moon') },
+  { name:'Heading',    tags:['heading','title','bada','h1','text'],    icon:'𝐇',  cat:'Text',     fn: ()=>addText('Heading',42,'#1a1a2e','bold') },
+  { name:'Subheading', tags:['subheading','subtitle','h2'],            icon:'𝐒',  cat:'Text',     fn: ()=>addText('Subheading',26,'#333','600') },
+  { name:'Body Text',  tags:['body','text','paragraph','content'],     icon:'📝', cat:'Text',     fn: ()=>addText('Body text here',16,'#555','400') },
+  { name:'Label',      tags:['label','caption','chhota','small'],      icon:'🏷️', cat:'Text',     fn: ()=>addText('LABEL',12,'#888','600') },
+  { name:'Image',      tags:['image','photo','tasveer','pic','upload'],icon:'🖼️', cat:'Media',    fn: ()=>document.getElementById('file-input').click() },
+  { name:'Emoji/Icon', tags:['emoji','icon','symbol','sticker'],       icon:'😊', cat:'Elements', fn: ()=>addIconEl() },
+];
+
+function showSearchResults(query) {
+  query = (query||'').toLowerCase().trim();
+  let panel = document.getElementById('search-results-panel');
+  let clear = document.getElementById('search-clear');
+  let tabs  = document.getElementById('panel-tabs-row') || document.querySelector('.panel-tabs');
+  let main  = document.querySelector('.panel-content');
+  clear.style.display = query ? 'block' : 'none';
+  if (!query) {
+    panel.style.display = 'none';
+    tabs.style.display = 'flex';
+    main.style.display = 'block';
+    return;
+  }
+  tabs.style.display = 'none';
+  main.style.display = 'none';
+  panel.style.display = 'block';
+  let results = ALL_ELEMENTS.filter(el =>
+    el.name.toLowerCase().includes(query) ||
+    el.tags.some(t => t.includes(query) || query.includes(t))
+  );
+  if (!results.length) {
+    panel.innerHTML = `<div class="sr-empty">"${query}" nahi mila<br><span style="font-size:11px">Try: rect, circle, text, heart...</span></div>`;
+    return;
+  }
+  let grouped = {};
+  results.forEach(r => { if (!grouped[r.cat]) grouped[r.cat]=[]; grouped[r.cat].push(r); });
+  let html = '';
+  Object.entries(grouped).forEach(([cat, items]) => {
+    html += `<div class="sr-section-title">${cat}</div>`;
+    items.forEach(item => {
+      let hl = item.name.replace(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'), '<span class="search-highlight">$1</span>');
+      html += `<div class="sr-item" onclick="(${item.fn.toString()})(); clearSearch();">
+        <div class="sr-icon">${item.icon}</div>
+        <div><div class="sr-name">${hl}</div><div class="sr-tag">${item.tags.slice(0,3).join(', ')}</div></div>
+        <i class="fas fa-plus" style="margin-left:auto;font-size:11px;color:#7a7a9a;"></i>
+      </div>`;
+    });
+  });
+  panel.innerHTML = html;
+}
+
+function hideSearchResults() {
+  if (!document.getElementById('el-search').value.trim()) clearSearch();
+}
+
+function clearSearch() {
+  document.getElementById('el-search').value = '';
+  document.getElementById('search-clear').style.display = 'none';
+  document.getElementById('search-results-panel').style.display = 'none';
+  let pt = document.getElementById('panel-tabs-row') || document.querySelector('.panel-tabs'); if(pt) pt.style.display='flex';
+  document.querySelector('.panel-content').style.display = 'block';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key==='f') { e.preventDefault(); document.getElementById('el-search').focus(); }
+  if (e.key==='Escape') clearSearch();
+});
+
+// Templates tab click pe load karo
+document.querySelectorAll('.panel-tab').forEach(tab => {
+  if (tab.textContent.trim() === 'Templates') {
+    tab.addEventListener('click', () => {
+      loadTemplates();
+    });
+  }
+});
+
+async function loadTemplates(cat) {
+  let grid = document.getElementById('templates-grid');
+  grid.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:24px;color:#7a7a9a;font-size:12px;"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+  try {
+    let r = await fetch('/api/templates');
+    let d = await r.json();
+    let list = d.templates || [];
+    if (cat && cat !== 'all') list = list.filter(t => t.cat === cat);
+    grid.innerHTML = list.map(tpl => `
+      <div class="tpl-card" onclick="applyHTMLTemplate('${tpl.id}','${tpl.name}')"
+        style="cursor:pointer;border-radius:10px;overflow:hidden;border:2px solid #2e2e42;transition:all .2s;margin-bottom:4px;"
+        onmouseover="this.style.borderColor='#7c6dfa'" onmouseout="this.style.borderColor='#2e2e42'">
+        <div style="height:120px;background:${tpl.thumb_bg};position:relative;display:flex;align-items:center;justify-content:center;">
+          <iframe src="/template/${tpl.id}"
+            style="width:700px;height:700px;border:none;pointer-events:none;
+            transform:scale(0.17);transform-origin:top left;position:absolute;top:0;left:0;"
+            scrolling="no" loading="lazy"></iframe>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+            background:rgba(124,109,250,0);transition:background .2s;border-radius:8px;"
+            onmouseover="this.style.background='rgba(124,109,250,0.7)';this.querySelector('span').style.opacity=1"
+            onmouseout="this.style.background='rgba(124,109,250,0)';this.querySelector('span').style.opacity=0">
+            <span style="color:#fff;font-size:12px;font-weight:600;opacity:0;transition:opacity .2s;">✦ Use Template</span>
+          </div>
+        </div>
+        <div style="padding:6px 8px;font-size:10px;font-weight:600;color:#7a7a9a;text-align:center;">${tpl.name}</div>
+      </div>`).join('');
+  } catch(e) {
+    grid.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:16px;color:#7a7a9a;">Load nahi hua</div>';
+  }
+}
+
+async function applyHTMLTemplate(id, name) {
+  try {
+    let r    = await fetch('/template/' + id);
+    let html = await r.text();
+
+    canvas.innerHTML = '';
+    selected = null;
+    elCounter = 0;
+
+    // iframe se actual size measure karo
+    let tplW = 700, tplH = 700;
+    await new Promise(resolve => {
+      let mf = document.createElement('iframe');
+      mf.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1400px;height:1400px;border:none;visibility:hidden;z-index:-999;';
+      document.body.appendChild(mf);
+      let done = false;
+      function finish() {
+        if (done) return; done = true;
+        try {
+          let iDoc = mf.contentDocument || mf.contentWindow.document;
+          let el = iDoc.querySelector('.poster') || iDoc.querySelector('.resume') || iDoc.querySelector('body > *:not(style):not(script)');
+          if (el && el.offsetWidth  > 50) tplW = el.offsetWidth;
+          if (el && el.offsetHeight > 50) tplH = el.offsetHeight;
+          if (tplW < 100) tplW = iDoc.body.scrollWidth  || 700;
+          if (tplH < 100) tplH = iDoc.body.scrollHeight || 700;
+        } catch(e) {}
+        document.body.removeChild(mf);
+        resolve();
+      }
+      mf.onload = () => setTimeout(finish, 400);
+      setTimeout(finish, 1200);
+      mf.srcdoc = html;
+    });
+
+    if (tplW < 100) tplW = 700;
+    if (tplH < 100) tplH = 700;
+
+    // Canvas ko template ke size pe set karo
+    cw = tplW;
+    ch = tplH;
+    let scale = 1;
+    let scaledW = tplW;
+    let scaledH = tplH;
+    let offX = 0;
+    let offY = 0;
+
+    // iframe — khud scale hoga, body nahi
+    let iframe = document.createElement('iframe');
+    iframe.style.cssText = [
+      'position:absolute',
+      'left:' + offX + 'px',
+      'top:' + offY + 'px',
+      'width:' + tplW + 'px',
+      'height:' + tplH + 'px',
+      'border:none',
+      'pointer-events:auto',
+      'z-index:1',
+      'transform:scale(' + scale + ')',
+      'transform-origin:top left'
+    ].join(';');
+    iframe.dataset.type = 'template-frame';
+    canvas.appendChild(iframe);
+
+    // body ko scale mat karo — sirf margin/padding hata do
+    let fixedHtml = html.replace('</head>', `
+      <style>
+        html, body { margin:0; padding:0; overflow:hidden; width:${tplW}px; height:${tplH}px; }
+      </style>
+      </head>`);
+
+    iframe.srcdoc = fixedHtml;
+
+    // Template ke aspect ratio ke hisaab se canvas resize karo
+    cw = tplW;
+    ch = tplH;
+    canvas.style.width      = cw + 'px';
+    canvas.style.height     = ch + 'px';
+    let sizeSelect = document.getElementById('canvas-size-sel');
+    if (sizeSelect) sizeSelect.value = 'custom';
+    canvas.style.background = '#ffffff';
+    canvas.style.overflow   = 'hidden';
+
+    fitZoom();
+    pushHistory();
+    showToast('✅ ' + name + ' load ho gaya!');
+
+  } catch(e) {
+    console.error(e);
+    showToast('❌ Template load nahi hua: ' + e.message);
+  }
+}
+
+function filterTemplates(cat, btn) {
+  document.querySelectorAll('.tpl-cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadTemplates(cat);
+}
+
+// ═══════════════════════════════════════════════════════
+//  3D OBJECTS SYSTEM — Three.js
+// ═══════════════════════════════════════════════════════
+
+let current3DColor = '#7c6dfa';
+let autoRotate3D   = true;
+let rotateSpeed3D  = 0.03;
+let active3DScenes = [];
+
+function add3D(type) {
+  if (typeof THREE === 'undefined') {
+    showToast('❌ Three.js load nahi hua');
+    return;
+  }
+
+  const SIZE = 160;
+
+  // Wrapper div
+  let wrap = document.createElement('div');
+  wrap.className   = 'canvas-el obj-3d-wrap';
+  wrap.dataset.type = '3d';
+  wrap.dataset.shape = type;
+  wrap.dataset.id   = ++elCounter;
+  wrap.style.cssText = `position:absolute;left:${cw/2-80}px;top:${ch/2-80}px;width:${SIZE}px;height:${SIZE}px;z-index:${elCounter};cursor:move;`;
+
+  // Three.js canvas
+  let renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(SIZE, SIZE);
+  renderer.setClearColor(0x000000, 0);
+  renderer.domElement.style.pointerEvents = 'none';
+  wrap.appendChild(renderer.domElement);
+
+  // Scene
+  let scene  = new THREE.Scene();
+  let camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  camera.position.z = 3;
+
+  // Geometry
+  let geo;
+  switch(type) {
+    case 'cube':     geo = new THREE.BoxGeometry(1.5,1.5,1.5); break;
+    case 'sphere':   geo = new THREE.SphereGeometry(1,32,32); break;
+    case 'cylinder': geo = new THREE.CylinderGeometry(.8,.8,1.8,32); break;
+    case 'cone':     geo = new THREE.ConeGeometry(1,2,32); break;
+    case 'torus':    geo = new THREE.TorusGeometry(.8,.3,16,100); break;
+    case 'diamond':
+      geo = new THREE.OctahedronGeometry(1.2); break;
+    default:         geo = new THREE.BoxGeometry(1.5,1.5,1.5);
+  }
+
+  let mat  = new THREE.MeshPhongMaterial({
+    color: new THREE.Color(current3DColor),
+    shininess: 80
+  });
+  let mesh = new THREE.Mesh(geo, mat);
+  scene.add(mesh);
+
+  // Lights
+  let ambLight = new THREE.AmbientLight(0xffffff, 0.5);
+  let dirLight = new THREE.DirectionalLight(0xffffff, 1);
+  dirLight.position.set(5, 5, 5);
+  scene.add(ambLight);
+  scene.add(dirLight);
+
+  // Resize handles
+  ['nw','n','ne','e','se','s','sw','w'].forEach(pos => {
+    let h = document.createElement('div');
+    h.className = `resize-handle ${pos}`;
+    wrap.appendChild(h);
+  });
+
+  // Rotate handle
+  let rot = document.createElement('div');
+  rot.className = 'rotate-handle'; rot.innerHTML = '↻';
+  wrap.appendChild(rot);
+
+  // Delete handle
+  let del = document.createElement('div');
+  del.className = 'delete-handle'; del.innerHTML = '✕';
+  del.onclick = e => {
+    e.stopPropagation();
+    // Remove from active scenes
+    active3DScenes = active3DScenes.filter(s => s.wrap !== wrap);
+    renderer.dispose();
+    wrap.remove();
+    selected = null;
+    updateProps(); updateLayers(); pushHistory();
+  };
+  wrap.appendChild(del);
+
+  canvas.appendChild(wrap);
+
+  // Mouse drag rotation
+  let isDragging = false, prevX = 0, prevY = 0;
+  wrap.addEventListener('mousedown', e => {
+    if (e.target.classList.contains('resize-handle') || 
+        e.target.classList.contains('rotate-handle') || 
+        e.target.classList.contains('delete-handle')) return;
+    isDragging = true; prevX = e.clientX; prevY = e.clientY;
+});
+  document.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    let dx = e.clientX - prevX, dy = e.clientY - prevY;
+    mesh.rotation.y += dx * 0.01;
+    mesh.rotation.x += dy * 0.01;
+    prevX = e.clientX; prevY = e.clientY;
+  });
+  document.addEventListener('mouseup', () => { isDragging = false; });
+
+  // Store scene info
+  let sceneObj = { wrap, renderer, scene, camera, mesh, active: true };
+  active3DScenes.push(sceneObj);
+
+  // Animation loop
+  function animate() {
+    if (!document.contains(wrap)) return;
+    requestAnimationFrame(animate);
+    if (autoRotate3D && !isDragging) {
+      mesh.rotation.y += rotateSpeed3D * 0.01;
+      mesh.rotation.x += rotateSpeed3D * 0.005;
+    }
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  attachDrag(wrap);
+  attachResize(wrap);
+  attachRotate(wrap);
+  selectEl(wrap);
+  pushHistory();
+  updateLayers();
+  showToast('✅ 3D ' + type + ' added!');
+}
+
+function set3DColor(color) {
+  current3DColor = color;
+  // Selected 3D object ka color change karo
+  if (selected && selected.dataset.type === '3d') {
+    let scene = active3DScenes.find(s => s.wrap === selected);
+    if (scene) {
+      scene.mesh.material.color.set(new THREE.Color(color));
+    }
+  }
+}
+
+function toggleAutoRotate(val) {
+  autoRotate3D = val;
+}
+
+function update3DSpeed(val) {
+  rotateSpeed3D = parseFloat(val);
+}
+
+</script>
+
+<style>
+.tb-back-btn {
+  display:flex; align-items:center; justify-content:center;
+  width:34px; height:34px; border-radius:8px;
+  border:1px solid var(--border); color:var(--text-muted);
+  text-decoration:none; font-size:13px; transition:all .15s; flex-shrink:0;
+}
+.tb-back-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--surface2); }
+</style>
+</body>
+</html>

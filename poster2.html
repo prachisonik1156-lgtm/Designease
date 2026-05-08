@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Workshop Flyer</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#f3f3f3;
+    font-family:Arial, Helvetica, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+}
+
+.poster{
+    width:700px;
+    height:700px;
+    background:#fff;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 12px 35px rgba(0,0,0,0.15);
+}
+
+/* Background strips */
+.left-yellow{
+    position:absolute;
+    left:0;
+    top:0;
+    width:26px;
+    height:100%;
+    background:#e8c547;
+}
+
+.right-yellow{
+    position:absolute;
+    right:0;
+    top:0;
+    width:48px;
+    height:100%;
+    background:#e8c547;
+}
+
+.right-pattern{
+    position:absolute;
+    right:48px;
+    top:0;
+    width:120px;
+    height:100%;
+    background:
+      linear-gradient(45deg, rgba(255,255,255,0.16) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0.16) 75%, transparent 75%, transparent);
+    background-size:24px 24px;
+    background-color:#e8c547;
+    opacity:0.55;
+}
+
+/* Top decoration */
+.top-circle-lines{
+    position:absolute;
+    top:-40px;
+    left:345px;
+    width:110px;
+    height:110px;
+    border-radius:50%;
+    border:2px dashed #6b7c8f;
+    opacity:.65;
+}
+
+.small-x{
+    position:absolute;
+    right:145px;
+    top:110px;
+    color:#3d5a70;
+    font-size:24px;
+    line-height:1.1;
+    font-weight:bold;
+}
+
+.small-x span{
+    display:block;
+}
+
+.logo{
+    position:absolute;
+    right:60px;
+    top:28px;
+    text-align:center;
+    color:#3d5a70;
+    z-index:2;
+}
+
+.logo .icon{
+    width:54px;
+    height:54px;
+    margin:auto;
+    border:4px solid #3d5a70;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+    background:#ffef9b;
+}
+
+.logo .text{
+    margin-top:8px;
+    font-size:12px;
+    font-weight:bold;
+    letter-spacing:.5px;
+}
+
+/* Left content */
+.content{
+    position:absolute;
+    left:55px;
+    top:55px;
+    width:260px;
+    z-index:2;
+}
+
+.title{
+    font-size:38px;
+    line-height:0.95;
+    font-weight:800;
+    color:#3d5a70;
+    text-transform:uppercase;
+}
+
+.para{
+    margin-top:18px;
+    font-size:13px;
+    line-height:1.6;
+    color:#6d7b88;
+}
+
+/* Small round image */
+.small-image-wrap{
+    position:absolute;
+    left:55px;
+    top:210px;
+    width:145px;
+    height:145px;
+    border:8px solid #e8c547;
+    border-radius:50%;
+    overflow:hidden;
+    cursor:pointer;
+    z-index:2;
+    background:#ddd;
+}
+
+.small-image-wrap img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.small-image-wrap::after{
+    content:"Click to upload";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    background:rgba(0,0,0,0.5);
+    color:#fff;
+    text-align:center;
+    font-size:12px;
+    padding:6px;
+    opacity:0;
+    transition:.3s;
+}
+
+.small-image-wrap:hover::after{
+    opacity:1;
+}
+
+/* Dots */
+.dots{
+    position:absolute;
+    left:55px;
+    top:390px;
+    display:grid;
+    grid-template-columns:repeat(7, 10px);
+    gap:10px 10px;
+    z-index:2;
+}
+
+.dots span{
+    width:5px;
+    height:5px;
+    background:#3d5a70;
+    border-radius:50%;
+}
+
+/* Date box */
+.date-box{
+    position:absolute;
+    left:55px;
+    top:450px;
+    background:#3d5a70;
+    color:#fff;
+    padding:12px 22px;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:700;
+    letter-spacing:1px;
+    z-index:2;
+}
+
+
+.date-box span{
+    color:#f0c84b;
+}
+
+.left-desc{
+    position:absolute;
+    left:55px;
+    top:500px;
+    width:245px;
+    font-size:12px;
+    color:#6f7984;
+    line-height:1.6;
+    z-index:2;
+}
+
+.info-title{
+    position:absolute;
+    left:55px;
+    bottom:100px;
+    font-size:16px;
+    font-weight:700;
+    color:#3d5a70;
+}
+
+.contact{
+    position:absolute;
+    left:55px;
+    bottom:5px;
+    color:#3d5a70;
+    z-index:2;
+}
+
+.contact-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:12px;
+    font-size:14px;
+}
+
+.contact-row i{
+    width:18px;
+    color:#3d5a70;
+}
+
+/* Decorative bottom shapes */
+.bottom-pill{
+    position:absolute;
+    right:95px;
+    bottom:-20px;
+    width:72px;
+    height:150px;
+    border:6px solid #e8c547;
+    border-radius:40px;
+    background:#fff;
+}
+
+.bottom-dots{
+    position:absolute;
+    right:155px;
+    bottom:105px;
+    display:grid;
+    grid-template-columns:repeat(4, 8px);
+    gap:10px;
+}
+
+.bottom-dots span{
+    width:4px;
+    height:4px;
+    background:#3d5a70;
+    border-radius:50%;
+}
+
+/* Main big image */
+.big-image-wrap{
+    position:absolute;
+    right:-60px;
+    top:120px;
+    width:360px;
+    height:480px;
+    border:8px solid #e8c547;
+    border-radius:50%;
+    overflow:hidden;
+    cursor:pointer;
+    background:#ddd;
+    z-index:1;
+}
+
+.big-image-wrap img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.big-image-wrap::after{
+    content:"Click to upload";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    background:rgba(0,0,0,0.5);
+    color:#fff;
+    text-align:center;
+    font-size:12px;
+    padding:6px;
+    opacity:0;
+    transition:.3s;
+}
+
+.big-image-wrap:hover::after{
+    opacity:1;
+}
+
+/* Name on image */
+.name-on-image{
+    position:absolute;
+    right:38px;
+    bottom:160px;
+    text-align:left;
+    color:#fff;
+    z-index:3;
+    width:230px;
+}
+
+.name-on-image .small{
+    font-size:14px;
+    margin-bottom:8px;
+}
+
+.name-on-image .big{
+    font-size:34px;
+    font-weight:800;
+    line-height:1;
+    text-transform:uppercase;
+}
+
+/* Social right */
+.follow{
+    position:absolute;
+    right:60px;
+    bottom:40px;
+    text-align:center;
+    z-index:3;
+    color:#3d5a70;
+}
+
+.follow-title{
+    font-size:15px;
+    font-weight:700;
+    margin-bottom:12px;
+}
+
+.social-icons{
+    display:flex;
+    gap:12px;
+    justify-content:center;
+}
+
+.social-icons div{
+    width:28px;
+    height:28px;
+    border:2px solid #3d5a70;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:4px;
+    font-size:14px;
+}
+
+/* Editable */
+[contenteditable="true"]{
+    outline:none;
+}
+
+[contenteditable="true"]:hover{
+    background:rgba(255,255,255,0.35);
+}
+
+[contenteditable="true"]:focus{
+    background:rgba(255,255,255,0.55);
+    border-radius:4px;
+}
+
+#bigInput,
+#smallInput{
+    display:none;
+}
+</style>
+</head>
+<body>
+
+<div class="poster">
+
+    <div class="left-yellow"></div>
+    <div class="right-yellow"></div>
+    <div class="right-pattern"></div>
+    <div class="top-circle-lines"></div>
+
+    <div class="small-x">
+        <span>×</span>
+        <span>×</span>
+    </div>
+
+    <div class="logo">
+        <div class="icon">✓</div>
+        <div class="text" contenteditable="true">YOURCOMPANY</div>
+    </div>
+
+    <div class="content">
+        <div class="title" contenteditable="true">BUSINESS<br>WORKSHOP</div>
+        <div class="para" contenteditable="true">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore.
+        </div>
+    </div>
+
+    <div class="small-image-wrap" onclick="document.getElementById('smallInput').click()">
+        <img id="smallPreview" src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80" alt="Small">
+    </div>
+    <input type="file" id="smallInput" accept="image/*">
+
+    <div class="dots">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="date-box" contenteditable="true">
+        JULY 14 <span>| 7 PM</span>
+    </div>
+
+    <div class="left-desc" contenteditable="true">
+        Lorem ipsum dolor sit amet, consect etur adipisicing elit, sed diam nonu my nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim
+    </div><br><br>
+
+    <div class="info-title">Info at:</div>
+
+    <div class="contact">
+        <div class="contact-row" contenteditable="true"><i class="fa-solid fa-phone"></i> +012 3456 789 00</div>
+        <div class="contact-row" contenteditable="true"><i class="fa-solid fa-globe"></i> www.yourwebsite.com</div>
+        <div class="contact-row" contenteditable="true"><i class="fa-solid fa-envelope"></i> yourmail@mail.com</div>
+    </div>
+
+    <div class="bottom-pill"></div>
+
+    <div class="bottom-dots">
+        <span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="big-image-wrap" onclick="document.getElementById('bigInput').click()">
+        <img id="bigPreview" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80" alt="Main">
+    </div>
+    <input type="file" id="bigInput" accept="image/*">
+
+    <div class="name-on-image">
+        <div class="small" contenteditable="true">special talk from</div>
+        <div class="big" contenteditable="true">DANIEL<br>SMART</div>
+    </div>
+
+    <div class="follow">
+        <div class="follow-title" contenteditable="true">Follow us:</div>
+        <div class="social-icons">
+            <div><i class="fa-brands fa-facebook-f"></i></div>
+            <div><i class="fa-brands fa-instagram"></i></div>
+            <div><i class="fa-brands fa-youtube"></i></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const bigInput = document.getElementById("bigInput");
+const smallInput = document.getElementById("smallInput");
+const bigPreview = document.getElementById("bigPreview");
+const smallPreview = document.getElementById("smallPreview");
+
+bigInput.addEventListener("change", function(e){
+    const file = e.target.files[0];
+    if(file){
+        const reader = new FileReader();
+        reader.onload = function(event){
+            bigPreview.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+smallInput.addEventListener("change", function(e){
+    const file = e.target.files[0];
+    if(file){
+        const reader = new FileReader();
+        reader.onload = function(event){
+            smallPreview.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+
+</body>
+</html>

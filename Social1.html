@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Social Media Template</title>
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+body{
+  background:#f0f0f0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  font-family:'Segoe UI',sans-serif;
+  padding:20px;
+}
+
+.post{
+  width:600px;
+  height:600px;
+  position:relative;
+  overflow:hidden;
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.2);
+}
+
+.bg-image{
+  position:absolute;
+  inset:0;
+  cursor:pointer;
+}
+.bg-image img{
+  width:100%; height:100%;
+  object-fit:cover;
+}
+.bg-image::after{
+  content:"Click to change";
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.4);
+  color:#fff;
+  font-size:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  transition:0.3s;
+}
+.bg-image:hover::after{ opacity:1; }
+
+/* Overlay */
+.overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.3) 55%, transparent 100%);
+}
+
+/* Top bar */
+.top-bar{
+  position:absolute;
+  top:24px; left:24px; right:24px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.brand-logo{
+  width:40px; height:40px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#f59e0b,#ef4444);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  cursor:pointer;
+  overflow:hidden;
+}
+.brand-logo img{
+  width:100%; height:100%;
+  object-fit:cover;
+  display:none;
+}
+
+.brand-name{
+  color:#fff;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:0.5px;
+  text-shadow:0 2px 8px rgba(0,0,0,0.5);
+}
+
+.top-tag{
+  background:linear-gradient(135deg,#f59e0b,#ef4444);
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  padding:5px 14px;
+  border-radius:20px;
+}
+
+/* Bottom content */
+.content{
+  position:absolute;
+  bottom:0; left:0; right:0;
+  padding:30px 28px;
+}
+
+.category{
+  display:inline-block;
+  background:rgba(245,158,11,0.9);
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  padding:5px 14px;
+  border-radius:4px;
+  margin-bottom:14px;
+}
+
+.headline{
+  font-size:34px;
+  font-weight:800;
+  color:#ffffff;
+  line-height:1.2;
+  margin-bottom:12px;
+  text-shadow:0 2px 12px rgba(0,0,0,0.4);
+}
+
+.caption{
+  font-size:14px;
+  color:rgba(255,255,255,0.75);
+  line-height:1.6;
+  margin-bottom:20px;
+}
+
+.bottom-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.hashtags{
+  font-size:13px;
+  color:rgba(255,255,255,0.6);
+}
+
+.cta{
+  background:linear-gradient(135deg,#f59e0b,#ef4444);
+  color:#fff;
+  border:none;
+  border-radius:25px;
+  padding:9px 22px;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+  letter-spacing:0.5px;
+}
+
+#bgInput,#logoInput{ display:none; }
+
+[contenteditable="true"]:hover{
+  background:rgba(255,255,255,0.15);
+  border-radius:4px;
+  outline:none;
+}
+[contenteditable="true"]:focus{ outline:none; }
+</style>
+</head>
+<body>
+
+<div class="post">
+
+  <!-- Background Image -->
+  <div class="bg-image" onclick="document.getElementById('bgInput').click()">
+    <img id="bgImg" src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=800&fit=crop&auto=format">
+  </div>
+  <input type="file" id="bgInput" accept="image/*">
+
+  <div class="overlay"></div>
+
+  <!-- Top -->
+  <div class="top-bar">
+    <div class="brand">
+      <div class="brand-logo" onclick="event.stopPropagation();document.getElementById('logoInput').click()">
+        🍽️
+        <img id="logoImg">
+      </div>
+      <input type="file" id="logoInput" accept="image/*">
+      <div class="brand-name" contenteditable="true">FoodieVibes</div>
+    </div>
+    <div class="top-tag" contenteditable="true">NEW POST</div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <div class="category" contenteditable="true">FOOD & LIFESTYLE</div>
+    <div class="headline" contenteditable="true">Taste the<br>Extraordinary</div>
+    <div class="caption" contenteditable="true">Discover flavors that tell a story. Every dish is a journey worth taking.</div>
+    <div class="bottom-row">
+      <div class="hashtags" contenteditable="true">#FoodLover #Delicious #Foodie</div>
+      <button class="cta" contenteditable="true">Explore Now</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.getElementById('bgInput').addEventListener('change',function(e){
+  const file=e.target.files[0];
+  if(file){ const r=new FileReader(); r.onload=ev=>document.getElementById('bgImg').src=ev.target.result; r.readAsDataURL(file); }
+});
+document.getElementById('logoInput').addEventListener('change',function(e){
+  const file=e.target.files[0];
+  if(file){
+    const r=new FileReader();
+    r.onload=function(ev){
+      const img=document.getElementById('logoImg');
+      img.src=ev.target.result;
+      img.style.display='block';
+    };
+    r.readAsDataURL(file);
+  }
+});
+</script>
+</body>
+</html>

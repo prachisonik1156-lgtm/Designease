@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DesignEase — User Management</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">D</div>
+    <span class="logo-text">DesignEase</span>
+    <span class="logo-badge">Admin</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Main</div>
+    <a href="{{ url_for('admin_dashboard') }}" class="nav-item"><i class="fas fa-chart-pie"></i> Dashboard</a>
+    <a href="{{ url_for('manage_templates') }}" class="nav-item"><i class="fas fa-layer-group"></i> Manage Templates</a>
+    <a href="{{ url_for('user_report') }}" class="nav-item"><i class="fas fa-chart-bar"></i> Usage Reports</a>
+    <div class="nav-section-title">Management</div>
+    <a href="{{ url_for('admin_messages') }}" class="nav-item">
+    <i class="fas fa-envelope"></i> Messages
+    </a>
+    <a href="{{ url_for('ai_features') }}" class="nav-item"><i class="fas fa-robot"></i> AI Features</a>
+    <a href="/admin/users" class="nav-item active"><i class="fas fa-users"></i> User Management</a>
+    <a href="{{ url_for('system_config') }}" class="nav-item"><i class="fas fa-sliders-h"></i> System Config</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-info">
+      <div class="admin-avatar">A</div>
+      <div><div class="admin-name">Administrator</div><div class="admin-role">Super Admin</div></div>
+    </div>
+    <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="top-header">
+    <div>
+      <span class="header-title">User Management</span>
+      <span class="header-subtitle">Monitor & manage all platform users</span>
+    </div>
+    <div class="header-actions">
+      <span class="badge badge-purple">{{ users|length }} Total Users</span>
+    </div>
+  </header>
+
+  <main class="page-content">
+
+    <!-- STATS -->
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px">
+      <div class="stat-card purple">
+        <div class="stat-top"><div class="stat-icon purple"><i class="fas fa-users"></i></div><span class="stat-change up">↑ 12%</span></div>
+        <div class="stat-value" data-count="{{ users|length }}">{{ users|length }}</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-top"><div class="stat-icon green"><i class="fas fa-user-check"></i></div></div>
+        <div class="stat-value" data-count="{{ users|length }}">{{ users|length }}</div>
+        <div class="stat-label">Active Users</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-top"><div class="stat-icon red"><i class="fas fa-user-times"></i></div></div>
+        <div class="stat-value">0</div>
+        <div class="stat-label">Blocked Users</div>
+      </div>
+    </div>
+
+    <!-- SEARCH & FILTER -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-body" style="padding:14px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div class="search-bar" style="flex:1;min-width:200px">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search by name or email..." id="userSearch">
+        </div>
+        <select class="form-control" style="width:150px">
+          <option>All Status</option>
+          <option>Active</option>
+          <option>Blocked</option>
+        </select>
+        <button class="btn btn-outline btn-sm">
+          <i class="fas fa-download"></i> Export CSV
+        </button>
+      </div>
+    </div>
+
+    <!-- USERS TABLE -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="fas fa-users"></i> All Users</div>
+        <span style="font-size:12px;color:var(--text-muted)">{{ users|length }} records</span>
+      </div>
+      <div class="card-body" style="padding:0">
+        <div class="table-wrap">
+          <table class="admin-table" id="usersTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Email</th>
+                <th>Designs</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in users %}
+              <tr id="user-row-{{ user.id }}">
+                <td style="color:var(--text-muted);font-size:12px">#{{ user.id }}</td>
+                <td>
+                  <div class="user-cell">
+                    <div class="u-avatar" style="background:hsl ({{ (user.id * 47) % 360 }},60%,45%)">
+                      {{ user.username[0].upper() }}
+                    </div>
+                    <div>
+                      <div class="u-name">{{ user.username }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-size:12px;color:var(--text-muted)">{{ user.email }}</td>
+                <td>
+                  <span class="badge badge-purple">{{ user.design_count if user.design_count is defined else '—' }}</span>
+                </td>
+                <td><span class="badge badge-green"><i class="fas fa-circle" style="font-size:7px;margin-right:4px"></i>Active</span></td>
+                <td>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn btn-outline btn-sm btn-icon" title="View Details" onclick="viewUser({{ user.id }},'{{ user.username }}','{{ user.email }}')">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm btn-icon" title="Block User" onclick="blockUser({{ user.id }},'{{ user.username }}')">
+                      <i class="fas fa-ban"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm btn-icon" title="Delete User" onclick="deleteUser({{ user.id }},'{{ user.username }}')">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted)">
+                  <i class="fas fa-users" style="font-size:32px;display:block;margin-bottom:12px;opacity:.3"></i>
+                  No users registered yet
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- VIEW USER MODAL -->
+<div class="modal-overlay" id="viewUserModal">
+  <div class="modal">
+    <div class="modal-title">
+      <span><i class="fas fa-user" style="color:var(--accent);margin-right:8px"></i>User Details</span>
+      <button class="modal-close" onclick="closeModal('viewUserModal')">✕</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:16px;background:var(--surface2);border-radius:var(--radius-sm)">
+      <div id="modalAvatar" class="u-avatar" style="width:52px;height:52px;font-size:20px;background:var(--accent)">U</div>
+      <div>
+        <div id="modalName" style="font-size:16px;font-weight:700"></div>
+        <div id="modalEmail" style="font-size:12px;color:var(--text-muted);margin-top:2px"></div>
+        <span class="badge badge-green" style="margin-top:6px">Active</span>
+      </div>
+    </div>
+    <div class="grid-2" style="gap:12px;margin-bottom:16px">
+      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:var(--accent)">—</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Designs Created</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:14px;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:var(--accent2)">—</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Uploads</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('viewUserModal')">Close</button>
+      <button class="btn btn-danger" onclick="closeModal('viewUserModal');showToast('User blocked')">
+        <i class="fas fa-ban"></i> Block User
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="admin-toast"></div>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+filterTable('userSearch', 'usersTable');
+
+function viewUser(id, name, email) {
+  document.getElementById('modalName').textContent  = name;
+  document.getElementById('modalEmail').textContent = email;
+  document.getElementById('modalAvatar').textContent = name[0].toUpperCase();
+  openModal('viewUserModal');
+}
+
+function blockUser(id, name) {
+  if (!confirm(`Block user "${name}"?`)) return;
+  fetch(`/admin/users/block/${id}`, {method:'POST'})
+    .then(r => r.json())
+    .then(() => showToast(`${name} has been blocked`));
+}
+
+function deleteUser(id, name) {
+  if (!confirm(`Permanently DELETE user "${name}"? This cannot be undone!`)) return;
+  fetch(`/admin/users/delete/${id}`, {method:'POST'})
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        document.getElementById(`user-row-${id}`)?.remove();
+        showToast(`${name} deleted`);
+      }
+    });
+}
+</script>
+</body>
+</html>

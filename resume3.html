@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Corporate Resume</title>
+
+<style>
+
+body{
+background:#eef4fb;
+font-family:Segoe UI;
+padding:30px;
+}
+
+.resume{
+width:900px;
+margin:auto;
+background:white;
+display:flex;
+box-shadow:0 10px 30px rgba(0,0,0,0.1);
+}
+
+.left{
+width:35%;
+background:#1e3a8a;
+color:white;
+padding:40px;
+text-align:center;
+}
+
+.right{
+width:65%;
+padding:50px;
+}
+
+.profile-img{
+width:180px;
+height:180px;
+border-radius:50%;
+overflow:hidden;
+margin:auto;
+cursor:pointer;
+border:4px solid white;
+}
+
+.profile-img img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+#photoInput{
+display:none;
+}
+
+.name{
+margin-top:20px;
+font-size:28px;
+font-weight:bold;
+}
+
+.role{
+letter-spacing:2px;
+margin-top:5px;
+}
+
+.section{
+margin-top:35px;
+text-align:left;
+}
+
+.section h3{
+border-bottom:1px solid rgba(255,255,255,0.4);
+padding-bottom:8px;
+margin-bottom:12px;
+}
+
+.section p{
+font-size:14px;
+margin-bottom:10px;
+}
+
+.right h2{
+color:#1e3a8a;
+margin-bottom:15px;
+}
+
+.entry{
+margin-bottom:20px;
+}
+
+.meta{
+color:gray;
+font-size:13px;
+}
+
+.desc{
+font-size:14px;
+line-height:1.7;
+color:#444;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="resume">
+
+<div class="left">
+
+<div class="profile-img" onclick="document.getElementById('photoInput').click()">
+<img id="profilePreview" src="https://randomuser.me/api/portraits/women/68.jpg">
+</div>
+
+<input type="file" id="photoInput">
+
+<div class="name" contenteditable="true">Emily Stone</div>
+<div class="role" contenteditable="true">Business Analyst</div>
+
+<div class="section">
+
+<h3>CONTACT</h3>
+
+<p contenteditable="true">📞 +91 9876543210</p>
+<p contenteditable="true">✉ emily@email.com</p>
+<p contenteditable="true">📍 Ahmedabad</p>
+
+</div>
+
+<div class="section">
+
+<h3>SKILLS</h3>
+
+<p contenteditable="true">Data Analysis</p>
+<p contenteditable="true">Power BI</p>
+<p contenteditable="true">Excel</p>
+<p contenteditable="true">SQL</p>
+
+</div>
+
+<div class="section">
+
+<h3>LANGUAGES</h3>
+
+<p contenteditable="true">English</p>
+<p contenteditable="true">Hindi</p>
+
+</div>
+
+</div>
+
+
+<div class="right">
+
+<h2>PROFILE</h2>
+
+<p class="desc" contenteditable="true">
+Experienced business analyst skilled in data-driven decision making and strategic planning.
+</p>
+
+<h2 style="margin-top:30px;">WORK EXPERIENCE</h2>
+
+<div class="entry">
+
+<h3 contenteditable="true">Senior Analyst</h3>
+<div class="meta" contenteditable="true">ABC Company | 2022</div>
+<p class="desc" contenteditable="true">
+Responsible for building dashboards and improving data reporting systems.
+</p>
+
+</div>
+
+<div class="entry">
+
+<h3 contenteditable="true">Junior Analyst</h3>
+<div class="meta" contenteditable="true">XYZ Corp | 2020</div>
+<p class="desc" contenteditable="true">
+Analyzed large datasets and generated weekly reports.
+</p>
+
+</div>
+
+<h2 style="margin-top:30px;">EDUCATION</h2>
+
+<div class="entry">
+
+<h3 contenteditable="true">MBA Business Analytics</h3>
+<div class="meta" contenteditable="true">University | 2018-2020</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const photoInput = document.getElementById("photoInput");
+const profilePreview = document.getElementById("profilePreview");
+
+photoInput.addEventListener("change", function(e){
+
+const file = e.target.files[0];
+
+if(file){
+const reader = new FileReader();
+reader.onload = function(event){
+profilePreview.src = event.target.result;
+}
+reader.readAsDataURL(file);
+}
+
+});
+
+</script>
+
+</body>
+</html>

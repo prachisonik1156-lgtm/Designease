@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DesignEase — AI Features</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">D</div>
+    <span class="logo-text">DesignEase</span>
+    <span class="logo-badge">Admin</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Main</div>
+    <a href="{{ url_for('admin_dashboard') }}" class="nav-item"><i class="fas fa-chart-pie"></i> Dashboard</a>
+    <a href="{{ url_for('manage_templates') }}" class="nav-item"><i class="fas fa-layer-group"></i> Manage Templates</a>
+    <a href="{{ url_for('user_report') }}" class="nav-item"><i class="fas fa-chart-bar"></i> Usage Reports</a>
+    <div class="nav-section-title">Management</div>
+    <a href="{{ url_for('admin_messages') }}" class="nav-item">
+    <i class="fas fa-envelope"></i> Messages
+    </a>
+    <a href="{{ url_for('ai_features') }}" class="nav-item active"><i class="fas fa-robot"></i> AI Features</a>
+    <a href="/admin/users" class="nav-item"><i class="fas fa-users"></i> User Management</a>
+    <a href="{{ url_for('system_config') }}" class="nav-item"><i class="fas fa-sliders-h"></i> System Config</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-info">
+      <div class="admin-avatar">A</div>
+      <div><div class="admin-name">Administrator</div><div class="admin-role">Super Admin</div></div>
+    </div>
+    <a href="{{ url_for('logout') }}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="top-header">
+    <div>
+      <span class="header-title">AI Features</span>
+      <span class="header-subtitle">Manage AI capabilities & settings</span>
+    </div>
+    <div class="header-actions">
+      <span class="badge badge-green"><i class="fas fa-circle" style="font-size:8px;margin-right:4px"></i> AI Online</span>
+    </div>
+  </header>
+
+  <main class="page-content">
+
+    <!-- AI STATUS CARDS -->
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px">
+      <div class="stat-card purple">
+        <div class="stat-top"><div class="stat-icon purple"><i class="fas fa-robot"></i></div><span class="stat-change up">Active</span></div>
+        <div class="stat-value">347</div>
+        <div class="stat-label">Presentations Generated</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-top"><div class="stat-icon green"><i class="fas fa-image"></i></div><span class="stat-change up">Active</span></div>
+        <div class="stat-value">2.4K</div>
+        <div class="stat-label">Images Fetched</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-top"><div class="stat-icon yellow"><i class="fas fa-bolt"></i></div></div>
+        <div class="stat-value">1.2s</div>
+        <div class="stat-label">Avg. Response Time</div>
+      </div>
+    </div>
+
+    <!-- FEATURE TOGGLES -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header">
+        <div class="card-title"><i class="fas fa-toggle-on"></i> Feature Controls</div>
+        <button class="btn btn-success btn-sm" onclick="showToast('All settings saved!')">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+      </div>
+      <div class="card-body">
+
+        <div class="feature-card" style="margin-bottom:12px">
+          <div class="feature-icon" style="background:rgba(108,99,255,.15);color:var(--accent)">
+            <i class="fas fa-magic"></i>
+          </div>
+          <div style="flex:1">
+            <div class="feature-title">AI Presentation Generator</div>
+            <div class="feature-desc">Allow users to generate AI-powered presentations using Claude API. Requires ANTHROPIC_API_KEY to be set.</div>
+          </div>
+          <div class="toggle-wrap" style="flex-shrink:0">
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label" data-feature="AI Presentation Generator">Enabled</span>
+          </div>
+        </div>
+
+        <div class="feature-card" style="margin-bottom:12px">
+          <div class="feature-icon" style="background:rgba(0,212,170,.15);color:var(--accent2)">
+            <i class="fas fa-image"></i>
+          </div>
+          <div style="flex:1">
+            <div class="feature-title">Auto Image Fetch (Unsplash/Pexels)</div>
+            <div class="feature-desc">Automatically fetch relevant images for each slide during presentation generation.</div>
+          </div>
+          <div class="toggle-wrap" style="flex-shrink:0">
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label" data-feature="Auto Image Fetch">Enabled</span>
+          </div>
+        </div>
+
+        <div class="feature-card" style="margin-bottom:12px">
+          <div class="feature-icon" style="background:rgba(255,107,107,.15);color:var(--accent3)">
+            <i class="fas fa-file-pdf"></i>
+          </div>
+          <div style="flex:1">
+            <div class="feature-title">PDF Export</div>
+            <div class="feature-desc">Allow users to download AI presentations as PDF files. Requires reportlab and Pillow.</div>
+          </div>
+          <div class="toggle-wrap" style="flex-shrink:0">
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label" data-feature="PDF Export">Enabled</span>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon" style="background:rgba(255,217,61,.15);color:var(--accent4)">
+            <i class="fas fa-edit"></i>
+          </div>
+          <div style="flex:1">
+            <div class="feature-title">Presentation Editor (editorg)</div>
+            <div class="feature-desc">Allow users to edit generated presentations — change slides, images, colors and themes.</div>
+          </div>
+          <div class="toggle-wrap" style="flex-shrink:0">
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label" data-feature="Presentation Editor">Enabled</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- AI CONFIG -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-cog"></i> AI Configuration</div>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">Claude Model</label>
+            <select class="form-control">
+              <option>claude-opus-4-6 (Best Quality)</option>
+              <option>claude-sonnet-4-6 (Balanced)</option>
+              <option>claude-haiku-4-5 (Fast)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Max Slides per Presentation</label>
+            <input class="form-control" type="number" value="7" min="3" max="20">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Max Tokens</label>
+            <input class="form-control" type="number" value="4000" min="1000" max="8000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Image Source Priority</label>
+            <select class="form-control">
+              <option>Pexels → Unsplash → Local DB</option>
+              <option>Unsplash → Pexels → Local DB</option>
+              <option>Local DB only</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="showToast('AI config saved!')">
+            <i class="fas fa-save"></i> Save Config
+          </button>
+        </div>
+      </div>
+
+      <!-- API Keys Status -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-key"></i> API Keys Status</div>
+        </div>
+        <div class="card-body">
+          <div class="config-row">
+            <div>
+              <div class="config-label">Anthropic API Key</div>
+              <div class="config-desc">Required for AI slide generation</div>
+            </div>
+            <span class="badge badge-green"><i class="fas fa-check"></i> Set</span>
+          </div>
+          <div class="config-row">
+            <div>
+              <div class="config-label">Unsplash Access Key</div>
+              <div class="config-desc">For high-quality slide images</div>
+            </div>
+            <span class="badge badge-yellow">Optional</span>
+          </div>
+          <div class="config-row">
+            <div>
+              <div class="config-label">Pexels API Key</div>
+              <div class="config-desc">Alternative image source</div>
+            </div>
+            <span class="badge badge-yellow">Optional</span>
+          </div>
+          <div style="margin-top:16px;padding:14px;background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.15);border-radius:var(--radius-sm)">
+            <div style="font-size:12px;color:var(--accent2);font-weight:600;margin-bottom:4px"><i class="fas fa-info-circle"></i> Tip</div>
+            <div style="font-size:12px;color:var(--text-muted)">Set keys as environment variables: <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;color:var(--text)">set ANTHROPIC_API_KEY=your_key</code></div>
+          </div>
+
+          <!-- Usage Chart -->
+          <div style="margin-top:20px">
+            <div style="font-size:12px;font-weight:600;margin-bottom:12px;color:var(--text-muted)">AI Usage This Week</div>
+            <canvas id="aiUsageChart" height="120"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="admin-toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+new Chart(document.getElementById('aiUsageChart').getContext('2d'), {
+  type: 'bar',
+  data: {
+    labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    datasets: [{
+      label: 'Presentations',
+      data: [12, 18, 15, 24, 19, 31, 27],
+      backgroundColor: 'rgba(108,99,255,0.7)',
+      borderRadius: 6
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true } }
+  }
+});
+</script>
+</body>
+</html>

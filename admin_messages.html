@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DesignEase — Messages</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">D</div>
+    <span class="logo-text">DesignEase</span>
+    <span class="logo-badge">Admin</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Main</div>
+    <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
+      <i class="fas fa-chart-pie"></i> Dashboard
+    </a>
+    <a href="{{ url_for('manage_templates') }}" class="nav-item">
+      <i class="fas fa-layer-group"></i> Manage Templates
+    </a>
+    <a href="{{ url_for('user_report') }}" class="nav-item">
+      <i class="fas fa-chart-bar"></i> Usage Reports
+    </a>
+    <div class="nav-section-title">Management</div>
+    <a href="{{ url_for('admin_messages') }}" class="nav-item active">
+      <i class="fas fa-envelope"></i> Messages
+      {% if unread > 0 %}
+      <span class="nav-badge red">{{ unread }}</span>
+      {% endif %}
+    </a>
+    <a href="{{ url_for('ai_features') }}" class="nav-item">
+      <i class="fas fa-robot"></i> AI Features
+    </a>
+    <a href="/admin/users" class="nav-item">
+      <i class="fas fa-users"></i> User Management
+    </a>
+    <a href="{{ url_for('system_config') }}" class="nav-item">
+      <i class="fas fa-sliders-h"></i> System Config
+    </a>
+    
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-info">
+      <div class="admin-avatar">A</div>
+      <div>
+        <div class="admin-name">Administrator</div>
+        <div class="admin-role">Super Admin</div>
+      </div>
+    </div>
+    <a href="{{ url_for('logout') }}" class="logout-btn">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrapper">
+  <header class="top-header">
+    <div>
+      <span class="header-title">Messages</span>
+      <span class="header-subtitle">Contact form submissions from users</span>
+    </div>
+    <div class="header-actions">
+      {% if unread > 0 %}
+      <span class="badge badge-red" style="font-size:13px;padding:6px 14px">
+        {{ unread }} Unread
+      </span>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="page-content">
+
+    <!-- STATS -->
+    <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px">
+      <div class="stat-card purple">
+        <div class="stat-top"><div class="stat-icon purple"><i class="fas fa-envelope"></i></div></div>
+        <div class="stat-value">{{ messages|length }}</div>
+        <div class="stat-label">Total Messages</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-top"><div class="stat-icon red"><i class="fas fa-envelope-open"></i></div></div>
+        <div class="stat-value">{{ unread }}</div>
+        <div class="stat-label">Unread</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-top"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div></div>
+        <div class="stat-value">{{ messages|length - unread }}</div>
+        <div class="stat-label">Read</div>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-body" style="padding:14px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div class="search-bar" style="flex:1;min-width:200px">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search messages..." id="msgSearch" oninput="filterMessages()">
+        </div>
+        <select class="form-control" id="statusFilter" style="width:150px" onchange="filterMessages()">
+          <option value="all">All Status</option>
+          <option value="unread">Unread</option>
+          <option value="read">Read</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="markAllRead()">
+          <i class="fas fa-check-double"></i> Mark All Read
+        </button>
+      </div>
+    </div>
+
+    <!-- MESSAGES LIST -->
+    <div class="card">
+      <div class="card-body" style="padding:0">
+        {% if messages %}
+        <div id="messagesList">
+          {% for msg in messages %}
+          <div class="msg-row {% if msg.status == 'unread' %}msg-unread{% endif %}"
+               id="msg-{{ msg.id }}"
+               data-name="{{ (msg.first_name ~ ' ' ~ msg.last_name)|lower }}"
+               data-email="{{ msg.email|lower }}"
+               data-subject="{{ (msg.subject or '')|lower }}"
+               data-status="{{ msg.status }}">
+
+            <!-- Collapsed view -->
+            <div class="msg-header" onclick="toggleMsg({{ msg.id }})">
+              <div class="msg-left">
+                <div class="msg-avatar">{{ msg.first_name[0]|upper }}</div>
+                <div class="msg-meta">
+                  <div class="msg-sender">
+                    {{ msg.first_name }} {{ msg.last_name }}
+                    {% if msg.status == 'unread' %}
+                    <span class="badge badge-red" style="font-size:10px;padding:2px 8px;margin-left:6px">New</span>
+                    {% endif %}
+                  </div>
+                  <div class="msg-preview">
+                    <span class="msg-email-tag">{{ msg.email }}</span>
+                    {% if msg.subject %}· {{ msg.subject }}{% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="msg-right">
+                <span class="msg-time">{{ msg.created_at[:16] if msg.created_at else '' }}</span>
+                <i class="fas fa-chevron-down msg-chevron" id="chev-{{ msg.id }}"></i>
+              </div>
+            </div>
+
+            <!-- Expanded view -->
+            <div class="msg-body" id="body-{{ msg.id }}" style="display:none">
+              <div class="msg-details-grid">
+                <div class="msg-detail-item">
+                  <span class="msg-detail-label"><i class="fas fa-user"></i> Name</span>
+                  <span class="msg-detail-val">{{ msg.first_name }} {{ msg.last_name }}</span>
+                </div>
+                <div class="msg-detail-item">
+                  <span class="msg-detail-label"><i class="fas fa-envelope"></i> Email</span>
+                  <a href="mailto:{{ msg.email }}" class="msg-detail-val msg-link">{{ msg.email }}</a>
+                </div>
+                {% if msg.phone %}
+                <div class="msg-detail-item">
+                  <span class="msg-detail-label"><i class="fas fa-phone"></i> Phone</span>
+                  <span class="msg-detail-val">{{ msg.phone }}</span>
+                </div>
+                {% endif %}
+                {% if msg.subject %}
+                <div class="msg-detail-item">
+                  <span class="msg-detail-label"><i class="fas fa-tag"></i> Subject</span>
+                  <span class="msg-detail-val">{{ msg.subject }}</span>
+                </div>
+                {% endif %}
+              </div>
+              <div class="msg-text">{{ msg.message }}</div>
+              <div class="msg-actions">
+                <a href="mailto:{{ msg.email }}?subject=Re: {{ msg.subject or 'Your Message' }}"
+                   class="btn btn-primary btn-sm">
+                  <i class="fas fa-reply"></i> Reply
+                </a>
+                {% if msg.status == 'unread' %}
+                <button class="btn btn-outline btn-sm" onclick="markRead({{ msg.id }})">
+                  <i class="fas fa-check"></i> Mark as Read
+                </button>
+                {% endif %}
+                <button class="btn btn-danger btn-sm" onclick="deleteMsg({{ msg.id }})">
+                  <i class="fas fa-trash"></i> Delete
+                </button>
+              </div>
+            </div>
+
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align:center;padding:60px 20px;color:var(--text-muted)">
+          <i class="fas fa-inbox" style="font-size:48px;margin-bottom:16px;display:block;opacity:0.3"></i>
+          <div style="font-size:16px;font-weight:600;margin-bottom:8px">No messages yet</div>
+          <div style="font-size:13px">Contact form submissions will appear here</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="admin-toast"></div>
+
+<!-- Extra styles for messages page -->
+<style>
+.msg-row {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.msg-row:last-child { border-bottom: none; }
+.msg-row:hover { background: var(--bg-secondary); }
+.msg-unread { background: rgba(99,102,241,0.04); }
+.msg-unread:hover { background: rgba(99,102,241,0.07); }
+
+.msg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.msg-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.msg-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #764ba2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+
+.msg-meta { min-width: 0; }
+
+.msg-sender {
+  font-size: 14px; font-weight: 700;
+  color: var(--text-primary);
+  display: flex; align-items: center;
+}
+
+.msg-preview {
+  font-size: 12px; color: var(--text-muted);
+  margin-top: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.msg-email-tag {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.msg-right {
+  display: flex; align-items: center; gap: 14px;
+  flex-shrink: 0; margin-left: 16px;
+}
+
+.msg-time {
+  font-size: 11px; color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.msg-chevron {
+  font-size: 12px; color: var(--text-muted);
+  transition: transform 0.2s;
+}
+.msg-chevron.open { transform: rotate(180deg); }
+
+/* Expanded body */
+.msg-body {
+  padding: 0 20px 20px 74px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.msg-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.msg-detail-item {
+  display: flex; flex-direction: column; gap: 3px;
+}
+
+.msg-detail-label {
+  font-size: 11px; font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.msg-detail-label i { margin-right: 5px; }
+
+.msg-detail-val {
+  font-size: 13px; color: var(--text-primary); font-weight: 500;
+}
+
+.msg-link { color: var(--accent); text-decoration: none; }
+.msg-link:hover { text-decoration: underline; }
+
+.msg-text {
+  font-size: 14px; color: var(--text-secondary);
+  line-height: 1.7;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  white-space: pre-wrap;
+}
+
+.msg-actions {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+</style>
+
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+// Toggle expand/collapse
+function toggleMsg(id) {
+  var body  = document.getElementById('body-' + id);
+  var chev  = document.getElementById('chev-' + id);
+  var isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  chev.classList.toggle('open', !isOpen);
+
+  // Auto mark as read when opened
+  var row = document.getElementById('msg-' + id);
+  if (!isOpen && row.dataset.status === 'unread') {
+    markRead(id, true);
+  }
+}
+
+// Mark single message as read
+function markRead(id, silent) {
+  fetch('/admin/messages/read/' + id, { method: 'POST' })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        var row = document.getElementById('msg-' + id);
+        row.classList.remove('msg-unread');
+        row.dataset.status = 'read';
+        var badge = row.querySelector('.badge-red');
+        if (badge) badge.remove();
+        var btn = row.querySelector('button[onclick*="markRead"]');
+        if (btn) btn.remove();
+        if (!silent) showToast('✅ Marked as read', 'success');
+        updateUnreadCount();
+      }
+    });
+}
+
+// Mark all as read
+function markAllRead() {
+  document.querySelectorAll('.msg-row').forEach(row => {
+    if (row.dataset.status === 'unread') {
+      markRead(parseInt(row.id.replace('msg-','')), true);
+    }
+  });
+  showToast('✅ All messages marked as read', 'success');
+}
+
+// Delete message
+function deleteMsg(id) {
+  confirmDelete('Delete this message permanently?', function() {
+    fetch('/admin/messages/delete/' + id, { method: 'POST' })
+      .then(r => r.json())
+      .then(d => {
+        if (d.success) {
+          var row = document.getElementById('msg-' + id);
+          row.style.opacity = '0';
+          row.style.transform = 'translateX(20px)';
+          row.style.transition = 'all 0.3s ease';
+          setTimeout(() => row.remove(), 300);
+          showToast('🗑️ Message deleted', 'success');
+          updateUnreadCount();
+        }
+      });
+  });
+}
+
+// Update unread count in sidebar badge
+function updateUnreadCount() {
+  var unreadRows = document.querySelectorAll('.msg-row[data-status="unread"]').length;
+  var badge = document.querySelector('.nav-item.active .nav-badge');
+  if (badge) {
+    if (unreadRows > 0) badge.textContent = unreadRows;
+    else badge.remove();
+  }
+}
+
+// Search + filter
+function filterMessages() {
+  var q      = document.getElementById('msgSearch').value.toLowerCase();
+  var status = document.getElementById('statusFilter').value;
+  document.querySelectorAll('.msg-row').forEach(row => {
+    var matchQ = !q ||
+      row.dataset.name.includes(q) ||
+      row.dataset.email.includes(q) ||
+      row.dataset.subject.includes(q);
+    var matchS = status === 'all' || row.dataset.status === status;
+    row.style.display = matchQ && matchS ? '' : 'none';
+  });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume Template 2</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+body{
+    background:#f8f5f2;
+    font-family:Georgia, serif;
+    padding:30px 0;
+}
+.resume{
+    width:850px;
+    margin:auto;
+    background:#fff;
+    box-shadow:0 10px 30px rgba(0,0,0,0.12);
+    padding:50px 60px;
+}
+.top{
+    display:flex;
+    align-items:center;
+    gap:30px;
+    margin-bottom:40px;
+}
+.profile-img{
+    width:140px;
+    height:140px;
+    border-radius:50%;
+    overflow:hidden;
+    cursor:pointer;
+    position:relative;
+}
+.profile-img img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+.profile-img::after{
+    content:"Upload";
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    background:rgba(0,0,0,.5);
+    color:white;
+    text-align:center;
+    font-size:12px;
+    padding:6px;
+    opacity:0;
+    transition:0.3s;
+}
+.profile-img:hover::after{
+    opacity:1;
+}
+#photoInput{
+    display:none;
+}
+.name h1{
+    font-size:42px;
+    color:#2d2d2d;
+    font-weight:500;
+}
+.name p{
+    margin-top:8px;
+    color:#7c5c43;
+    letter-spacing:2px;
+    font-size:15px;
+}
+.line{
+    height:2px;
+    background:#d6c2b2;
+    margin:25px 0 35px;
+}
+.section{
+    margin-bottom:35px;
+}
+.section h2{
+    font-size:18px;
+    margin-bottom:15px;
+    color:#7c5c43;
+    letter-spacing:2px;
+    text-transform:uppercase;
+}
+.section p, .section li{
+    color:#555;
+    line-height:1.8;
+    font-size:15px;
+}
+.entry{
+    margin-bottom:18px;
+}
+.entry h3{
+    font-size:17px;
+    color:#2d2d2d;
+}
+.meta{
+    font-size:13px;
+    color:#888;
+    margin:5px 0 8px;
+}
+.two-col{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:30px;
+}
+[contenteditable="true"]{
+    outline:none;
+}
+[contenteditable="true"]:hover{
+    background:#f9f4ef;
+}
+</style>
+</head>
+<body>
+
+<div class="resume">
+    <div class="top">
+        <div class="profile-img" onclick="document.getElementById('photoInput').click()">
+            <img id="profilePreview" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=800&auto=format&fit=crop" alt="Profile">
+        </div>
+        <input type="file" id="photoInput" accept="image/*">
+
+        <div class="name">
+            <h1 contenteditable="true">Emma Johnson</h1>
+            <p contenteditable="true">Marketing Specialist</p>
+        </div>
+    </div>
+
+    <div class="line"></div>
+
+    <div class="section">
+        <h2>About Me</h2>
+        <p contenteditable="true">
+            Passionate marketing specialist with experience in campaign planning, content strategy, and branding. Strong communication and team collaboration skills.
+        </p>
+    </div>
+
+    <div class="two-col">
+        <div>
+            <div class="section">
+                <h2>Experience</h2>
+
+                <div class="entry">
+                    <h3 contenteditable="true">Marketing Executive</h3>
+                    <div class="meta" contenteditable="true">Creative Agency | 2021 - Present</div>
+                    <p contenteditable="true">Managed digital campaigns, client content calendars, and audience analysis.</p>
+                </div>
+
+                <div class="entry">
+                    <h3 contenteditable="true">Content Strategist</h3>
+                    <div class="meta" contenteditable="true">Brand Studio | 2019 - 2021</div>
+                    <p contenteditable="true">Created content plans and optimized brand messaging across social platforms.</p>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section">
+                <h2>Education</h2>
+                <div class="entry">
+                    <h3 contenteditable="true">MBA in Marketing</h3>
+                    <div class="meta" contenteditable="true">ABC University | 2017 - 2019</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Contact</h2>
+                <p contenteditable="true"><i class="fa fa-phone"></i> +91 9999999999</p>
+                <p contenteditable="true"><i class="fa fa-envelope"></i> emma@email.com</p>
+                <p contenteditable="true"><i class="fa fa-location-dot"></i> Mumbai, India</p>
+            </div>
+
+            <div class="section">
+                <h2>Skills</h2>
+                <p contenteditable="true">Branding, SEO, Campaign Management, Communication</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const photoInput = document.getElementById("photoInput");
+const profilePreview = document.getElementById("profilePreview");
+
+photoInput.addEventListener("change", function(event){
+    const file = event.target.files[0];
+    if(file){
+        const reader = new FileReader();
+        reader.onload = function(e){
+            profilePreview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+
+</body>
+</html>

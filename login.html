@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Login Page</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+<style>
+#toast {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-80px);
+  background: #22c55e;
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  z-index: 9999;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+#toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+#toast.error {
+  background: #ef4444;
+}
+
+/* Inline error box under form */
+.error-box {
+  display: none;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 10px;
+  text-align: center;
+}
+.error-box.show { display: block; }
+</style>
+</head>
+
+<body>
+
+<div id="toast">✅ Logged out successfully!</div>
+
+<div class="container">
+  <div class="left">
+    <h1>LOGIN</h1><br>
+    <form method="POST" action="/login" id="loginForm">
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="password" name="password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+
+    <!-- Error message box -->
+    <div class="error-box" id="errorBox">
+      ❌ Invalid email or password. Please try again.
+    </div>
+
+    <div class="forgot">
+      <a href="{{ url_for('forgot') }}">Forgot Password?</a><br><br>
+      <a href="{{ url_for('signup') }}">Don't Have Account? Sign Up</a>
+    </div>
+  </div>
+  <div class="right">
+    <img src="{{ url_for('static', filename='login.jpeg') }}" alt="Login Illustration">
+  </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    {% if category == 'logout' %}
+    <script>
+      window.addEventListener('DOMContentLoaded', function() {
+        var t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(function() { t.classList.remove('show'); }, 3000);
+      });
+    </script>
+    {% endif %}
+    {% if category == 'error' %}
+    <script>
+      window.addEventListener('DOMContentLoaded', function() {
+        // Error toast
+        var t = document.getElementById('toast');
+        t.textContent = '❌ {{ message }}';
+        t.classList.add('error', 'show');
+        setTimeout(function() { t.classList.remove('show'); }, 4000);
+
+        
+      });
+    </script>
+    {% endif %}
+  {% endfor %}
+{% endwith %}
+
+</body>
+</html>

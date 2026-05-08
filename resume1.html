@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume Template 1</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+body{
+    background:#eef2f7;
+    font-family:Arial, sans-serif;
+    padding:30px 0;
+}
+.resume{
+    width:900px;
+    margin:auto;
+    display:flex;
+    background:#fff;
+    box-shadow:0 10px 30px rgba(0,0,0,0.12);
+}
+.left{
+    width:35%;
+    background:#1f2937;
+    color:white;
+    padding:40px 30px;
+    text-align:center;
+}
+.right{
+    width:65%;
+    padding:50px 45px;
+}
+.profile-img{
+    width:180px;
+    height:180px;
+    margin:auto;
+    border-radius:50%;
+    overflow:hidden;
+    cursor:pointer;
+    border:4px solid white;
+    position:relative;
+}
+.profile-img img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+.profile-img::after{
+    content:"Upload";
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    background:rgba(0,0,0,0.55);
+    color:white;
+    font-size:13px;
+    padding:6px;
+    opacity:0;
+    transition:0.3s;
+}
+.profile-img:hover::after{
+    opacity:1;
+}
+#photoInput{
+    display:none;
+}
+.name{
+    margin-top:25px;
+    font-size:32px;
+    font-weight:bold;
+}
+.role{
+    margin-top:8px;
+    font-size:14px;
+    letter-spacing:2px;
+    color:#d1d5db;
+}
+.section-title{
+    margin-top:35px;
+    margin-bottom:15px;
+    font-size:17px;
+    letter-spacing:2px;
+    border-bottom:1px solid rgba(255,255,255,0.3);
+    padding-bottom:8px;
+}
+.contact p, .skills p{
+    margin-bottom:12px;
+    font-size:14px;
+    color:#e5e7eb;
+}
+.right h2{
+    font-size:22px;
+    color:#111827;
+    margin-bottom:15px;
+    border-bottom:2px solid #2563eb;
+    display:inline-block;
+    padding-bottom:5px;
+}
+.block{
+    margin-bottom:35px;
+}
+.entry{
+    margin-bottom:22px;
+}
+.entry h3{
+    font-size:18px;
+    color:#111827;
+}
+.meta{
+    font-size:13px;
+    color:#6b7280;
+    margin:6px 0 10px;
+}
+.desc{
+    font-size:14px;
+    color:#4b5563;
+    line-height:1.7;
+}
+[contenteditable="true"]{
+    outline:none;
+}
+[contenteditable="true"]:hover{
+    background:#f3f4f6;
+}
+</style>
+</head>
+<body>
+
+<div class="resume">
+    <div class="left">
+        <div class="profile-img" onclick="document.getElementById('photoInput').click()">
+            <img id="profilePreview" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=800&auto=format&fit=crop" alt="Profile">
+        </div>
+        <input type="file" id="photoInput" accept="image/*">
+
+        <div class="name" contenteditable="true">SARA WALTON</div>
+        <div class="role" contenteditable="true">UI / UX DESIGNER</div>
+
+        <div class="section-title">CONTACT</div>
+        <div class="contact">
+            <p contenteditable="true"><i class="fa fa-phone"></i> +91 9876543210</p>
+            <p contenteditable="true"><i class="fa fa-envelope"></i> sara@email.com</p>
+            <p contenteditable="true"><i class="fa fa-location-dot"></i> Ahmedabad, India</p>
+        </div>
+
+        <div class="section-title">SKILLS</div>
+        <div class="skills">
+            <p contenteditable="true">Figma</p>
+            <p contenteditable="true">Adobe XD</p>
+            <p contenteditable="true">HTML / CSS</p>
+            <p contenteditable="true">Wireframing</p>
+        </div>
+    </div>
+
+    <div class="right">
+        <div class="block">
+            <h2>Profile</h2>
+            <div class="desc" contenteditable="true">
+                Creative and detail-oriented designer with experience in user interface design, wireframing, prototyping, and front-end collaboration.
+            </div>
+        </div>
+
+        <div class="block">
+            <h2>Experience</h2>
+
+            <div class="entry">
+                <h3 contenteditable="true">Senior Designer</h3>
+                <div class="meta" contenteditable="true">ABC Company | 2022 - Present</div>
+                <div class="desc" contenteditable="true">Worked on design systems, web applications, and user flow improvements for multiple client projects.</div>
+            </div>
+
+            <div class="entry">
+                <h3 contenteditable="true">UI Designer</h3>
+                <div class="meta" contenteditable="true">XYZ Studio | 2020 - 2022</div>
+                <div class="desc" contenteditable="true">Created landing pages, dashboards, and app interfaces with responsive layouts.</div>
+            </div>
+        </div>
+
+        <div class="block">
+            <h2>Education</h2>
+            <div class="entry">
+                <h3 contenteditable="true">Bachelor of Design</h3>
+                <div class="meta" contenteditable="true">University Name | 2017 - 2020</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const photoInput = document.getElementById("photoInput");
+const profilePreview = document.getElementById("profilePreview");
+
+photoInput.addEventListener("change", function(event){
+    const file = event.target.files[0];
+    if(file){
+        const reader = new FileReader();
+        reader.onload = function(e){
+            profilePreview.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+
+</body>
+</html>

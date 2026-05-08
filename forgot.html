@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Reset Password</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='forgot.css') }}">
+</head>
+
+<body>
+
+<!-- SUCCESS POPUP -->
+<div class="popup-overlay" id="popup-overlay">
+  <div class="popup-box">
+    <div class="popup-icon">✅</div>
+    <h2>Password Reset Successful!</h2>
+    
+    <a href="{{ url_for('login') }}"><button class="popup-btn">Go to Login</button></a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- LEFT — Reset Password Form -->
+  <div class="left">
+    <h1>Reset Password</h1>
+    <h3>RESET</h3>
+
+    <input type="email" id="email" placeholder="Enter your email">
+
+    <div class="pw-wrap">
+      <input type="password" id="new-password" placeholder="New password">
+      <span class="eye" onclick="toggle('new-password')">👁</span>
+    </div>
+
+    <div class="pw-wrap">
+      <input type="password" id="confirm-password" placeholder="Confirm new password">
+      <span class="eye" onclick="toggle('confirm-password')">👁</span>
+    </div>
+
+    <p class="error-msg" id="error-msg"></p>
+
+    <button onclick="resetPassword()">Reset Password</button>
+
+    <div class="forgot">
+      <a href="{{ url_for('login') }}">Back to Login</a>
+    </div>
+  </div>
+
+  <!-- RIGHT IMAGE — same as before -->
+  <div class="right">
+    <img src="{{ url_for('static', filename='forgot.jpeg') }}" alt="Illustration">
+  </div>
+
+</div>
+
+<script>
+  function toggle(id) {
+    const inp = document.getElementById(id);
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  function resetPassword() {
+    const email  = document.getElementById('email').value.trim();
+    const newPw  = document.getElementById('new-password').value;
+    const confPw = document.getElementById('confirm-password').value;
+    const errEl  = document.getElementById('error-msg');
+    errEl.textContent = '';
+
+    if (!email)           { errEl.textContent = 'Please enter your email.'; return; }
+    if (!newPw)           { errEl.textContent = 'Please enter a new password.'; return; }
+    if (newPw !== confPw) { errEl.textContent = 'Passwords do not match.'; return; }
+
+    fetch('/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: newPw })
+    })
+    .then(r => r.json())
+    .then(d => {
+      if (d.success) {
+        document.getElementById('popup-overlay').classList.add('show');
+      } else {
+        errEl.textContent = d.error || 'Something went wrong.';
+      }
+    })
+    .catch(() => { errEl.textContent = 'Server error. Please try again.'; });
+  }
+</script>
+
+</body>
+</html>

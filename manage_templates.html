@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DesignEase — Manage Templates</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">D</div>
+    <span class="logo-text">DesignEase</span>
+    <span class="logo-badge">Admin</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Main</div>
+    <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
+      <i class="fas fa-chart-pie"></i> Dashboard
+    </a>
+    <a href="{{ url_for('manage_templates') }}" class="nav-item active">
+      <i class="fas fa-layer-group"></i> Manage Templates
+    </a>
+    <a href="{{ url_for('user_report') }}" class="nav-item">
+      <i class="fas fa-chart-bar"></i> Usage Reports
+    </a>
+    <div class="nav-section-title">Management</div>
+
+    <a href="{{ url_for('admin_messages') }}" class="nav-item">
+    <i class="fas fa-envelope"></i> Messages
+    </a>
+    <a href="{{ url_for('ai_features') }}" class="nav-item">
+      <i class="fas fa-robot"></i> AI Features
+    </a>
+    <a href="/admin/users" class="nav-item">
+      <i class="fas fa-users"></i> User Management
+    </a>
+    <a href="{{ url_for('system_config') }}" class="nav-item">
+      <i class="fas fa-sliders-h"></i> System Config
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-info">
+      <div class="admin-avatar">A</div>
+      <div>
+        <div class="admin-name">Administrator</div>
+        <div class="admin-role">Super Admin</div>
+      </div>
+    </div>
+    <a href="{{ url_for('logout') }}" class="logout-btn">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrapper">
+  <header class="top-header">
+    <div>
+      <span class="header-title">Manage Templates</span>
+      <span class="header-subtitle">Add, edit & organize design templates</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" onclick="openModal('addTplModal')">
+        <i class="fas fa-plus"></i> Add Template
+      </button>
+    </div>
+  </header>
+
+  <main class="page-content">
+
+    <!-- STATS ROW — dynamic from EDITOR_TEMPLATE_LIST -->
+    <div class="stats-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:24px">
+      <div class="stat-card purple">
+        <div class="stat-top"><div class="stat-icon purple"><i class="fas fa-layer-group"></i></div></div>
+        <div class="stat-value">{{ total_templates }}</div>
+        <div class="stat-label">Total Templates</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-top"><div class="stat-icon green"><i class="fas fa-image"></i></div></div>
+        <div class="stat-value">{{ cat_counts.poster }}</div>
+        <div class="stat-label">Poster</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-top"><div class="stat-icon red"><i class="fas fa-file-alt"></i></div></div>
+        <div class="stat-value">{{ cat_counts.resume }}</div>
+        <div class="stat-label">Resume</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-top"><div class="stat-icon yellow"><i class="fas fa-presentation"></i></div></div>
+        <div class="stat-value">{{ cat_counts.presentation }}</div>
+        <div class="stat-label">Presentation</div>
+      </div>
+      <div class="stat-card blue" style="--card-color:#3b82f6">
+        <div class="stat-top"><div class="stat-icon" style="background:rgba(59,130,246,0.15);color:#3b82f6"><i class="fas fa-hashtag"></i></div></div>
+        <div class="stat-value">{{ cat_counts.social + cat_counts.travel }}</div>
+        <div class="stat-label">Social & Travel</div>
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-body" style="padding:14px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <div class="search-bar" style="flex:1;min-width:200px">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search templates..." id="tplSearch">
+        </div>
+        <select class="form-control" id="catFilter" style="width:160px" onchange="filterTemplates()">
+          <option value="all">All Categories</option>
+          <option value="poster">Poster</option>
+          <option value="resume">Resume</option>
+          <option value="presentation">Presentation</option>
+          <option value="social">Social Media</option>
+          <option value="travel">Travel</option>
+        </select>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-outline btn-sm" onclick="setView('grid')" id="gridBtn"><i class="fas fa-th"></i></button>
+          <button class="btn btn-outline btn-sm" onclick="setView('list')" id="listBtn"><i class="fas fa-list"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEMPLATE GRID — from EDITOR_TEMPLATE_LIST passed by Flask -->
+    <div id="tplGrid" class="grid-auto">
+      {% for tpl in templates %}
+      <div class="tpl-card" data-cat="{{ tpl.cat }}" data-name="{{ tpl.name.lower() }}">
+        <div class="tpl-thumb" style="background:{{ tpl.thumb_bg }};border-radius:10px;height:100px;display:flex;align-items:center;justify-content:center;font-size:36px">
+          {% if tpl.cat == 'poster' %}🪧
+          {% elif tpl.cat == 'resume' %}📄
+          {% elif tpl.cat == 'presentation' %}📊
+          {% elif tpl.cat == 'social' %}📱
+          {% elif tpl.cat == 'travel' %}✈️
+          {% else %}🎨{% endif %}
+        </div>
+        <div class="tpl-info">
+          <div class="tpl-name">{{ tpl.name }}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <span class="badge
+              {% if tpl.cat == 'poster' %}badge-purple
+              {% elif tpl.cat == 'resume' %}badge-green
+              {% elif tpl.cat == 'presentation' %}badge-yellow
+              {% elif tpl.cat == 'social' %}badge-blue
+              {% else %}badge-orange{% endif %}">
+              {{ tpl.cat.title() }}
+            </span>
+            <span style="font-size:11px;color:var(--text-muted)">
+              <i class="fas fa-code" style="margin-right:4px"></i>{{ tpl.id }}
+            </span>
+          </div>
+          <div class="tpl-actions">
+            <a href="/template/{{ tpl.id }}" target="_blank" class="btn btn-outline btn-sm" style="flex:1">
+              <i class="fas fa-eye"></i> Preview
+            </a>
+            <button class="btn btn-danger btn-sm btn-icon"
+              onclick="confirmDelete('Delete {{ tpl.name }}?', ()=>showToast('{{ tpl.name }} removed','success'))">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)">
+        <i class="fas fa-layer-group" style="font-size:48px;margin-bottom:16px;display:block;opacity:0.3"></i>
+        No templates found
+      </div>
+      {% endfor %}
+    </div>
+
+  </main>
+</div>
+
+<!-- ADD TEMPLATE MODAL -->
+<div class="modal-overlay" id="addTplModal">
+  <div class="modal">
+    <div class="modal-title">
+      <span><i class="fas fa-plus" style="color:var(--accent);margin-right:8px"></i>Add New Template</span>
+      <button class="modal-close" onclick="closeModal('addTplModal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Template Name</label>
+      <input class="form-control" type="text" id="newTplName" placeholder="e.g. Modern Business Card">
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-control" id="newTplCat">
+          <option value="poster">Poster</option>
+          <option value="resume">Resume</option>
+          <option value="presentation">Presentation</option>
+          <option value="social">Social Media</option>
+          <option value="travel">Travel</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Template ID</label>
+        <input class="form-control" type="text" id="newTplId" placeholder="e.g. poster5">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">HTML File Name</label>
+      <input class="form-control" type="text" id="newTplHtml" placeholder="e.g. poster5.html (place in templates/)">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Thumbnail Background</label>
+      <input class="form-control" type="text" id="newTplBg" placeholder="e.g. linear-gradient(135deg,#667eea,#764ba2)">
+    </div>
+    <div class="form-group">
+      <label class="form-label" style="font-size:11px;color:var(--text-muted)">
+        ⚠️ Template HTML file manually <code>templates/</code> folder mein add karein,
+        phir <code>app.py</code> ke <code>EDITOR_TEMPLATE_LIST</code> mein entry add karein.
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('addTplModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="copySnippet()">
+        <i class="fas fa-copy"></i> Copy Code Snippet
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="admin-toast"></div>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+function filterTemplates() {
+  const q   = document.getElementById('tplSearch').value.toLowerCase();
+  const cat = document.getElementById('catFilter').value;
+  document.querySelectorAll('.tpl-card').forEach(card => {
+    const matchCat  = cat === 'all' || card.dataset.cat === cat;
+    const matchName = card.dataset.name.includes(q);
+    card.style.display = matchCat && matchName ? '' : 'none';
+  });
+}
+document.getElementById('tplSearch').addEventListener('input', filterTemplates);
+
+function setView(v) {
+  const grid = document.getElementById('tplGrid');
+  if (v === 'list') {
+    grid.style.gridTemplateColumns = '1fr';
+    document.getElementById('listBtn').classList.add('btn-primary');
+    document.getElementById('gridBtn').classList.remove('btn-primary');
+  } else {
+    grid.style.gridTemplateColumns = '';
+    document.getElementById('gridBtn').classList.add('btn-primary');
+    document.getElementById('listBtn').classList.remove('btn-primary');
+  }
+}
+
+function copySnippet() {
+  const name = document.getElementById('newTplName').value.trim();
+  const cat  = document.getElementById('newTplCat').value;
+  const id   = document.getElementById('newTplId').value.trim();
+  const bg   = document.getElementById('newTplBg').value.trim() || 'linear-gradient(135deg,#667eea,#764ba2)';
+
+  if (!name || !id) {
+    showToast('Name aur ID required hai', 'error');
+    return;
+  }
+
+  const snippet = `    {'id': '${id}', 'name': '${name}', 'cat': '${cat}', 'thumb_bg': '${bg}'},`;
+  navigator.clipboard.writeText(snippet).then(() => {
+    showToast('Code snippet copied! app.py ke EDITOR_TEMPLATE_LIST mein paste karo', 'success');
+    closeModal('addTplModal');
+  });
+}
+</script>
+</body>
+</html>
